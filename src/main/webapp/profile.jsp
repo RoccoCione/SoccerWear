@@ -18,7 +18,7 @@
     body{margin:0;background:#111;color:var(--ink);font-family:"Inter",system-ui,Segoe UI,Roboto,Arial,sans-serif}
     .page{min-height:100dvh;padding:28px;background:#111}
 
-    /* ===== HEADER ===== */
+   /* HEADER (come home.jsp) */
     .topbar{display:grid;grid-template-columns:minmax(240px,1fr) auto minmax(360px,1.2fr);align-items:center;gap:18px 28px;padding:18px 14px 8px;}
     .brand{display:flex;align-items:center;gap:14px}
     .logo{width:52px;height:52px}
@@ -26,11 +26,11 @@
     .title{margin:0;font-size:clamp(22px,3.4vw,34px);font-weight:800}
     .subtitle{margin:.5px 0 0;color:var(--muted);font-size:13.5px;font-weight:700}
     .mainnav{display:flex;gap:26px;justify-self:center}
-    .navlink{color:#fff;text-decoration:none;font-weight:800;font-size:clamp(14px,1.8vw,20px);display:inline-flex;align-items:center;gap:8px;position:relative}
-    .navlink::after{content:"";position:absolute;left:0;right:0;bottom:-4px;height:2px;background:currentColor;opacity:.8;transform:scaleX(1);transform-origin:left;transition:.2s}
-    .navlink:hover::after{opacity:1;transform:scaleX(1.06)}
+    .navlink{color:#fff;text-decoration:none;font-weight:800;font-size:clamp(14px,1.8vw,20px);display:inline-flex;align-items:center;gap:8px;position:relative;padding:15px}
+    .navlink::after{content:"";position:absolute;left:0;right:0;bottom:-4px;height:2px;background:currentColor;opacity:.6;transform:scaleX(0);transition:.2s}
+    .navlink:hover::after{opacity:1;transform:scaleX(1)}
     .actions{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:14px 18px;justify-self:end}
-    .cart{position:relative;color:#fff;display:inline-flex;align-items:center;justify-content:center;padding:10px;border-radius:12px;border:1px solid var(--ring);background:rgba(255,255,255,.03);font-size:26px}
+    .cart{position:relative;color:#fff;display:inline-flex;align-items:center;justify-content:center;padding:10px;border-radius:12px;border:1px solid var(--ring);background:rgba(255,255,255,.03);font-size:22px}
     .cart .badge{position:absolute;top:4px;right:4px;background:#e63946;color:#fff;font-size:12px;font-weight:700;border-radius:50%;padding:3px 6px;line-height:1}
     .greeting{text-align:right}
     .greeting .hello{font-size:clamp(18px,2.4vw,28px);font-weight:800}
@@ -38,6 +38,18 @@
     .search{grid-column:1/-1;display:flex;align-items:center;gap:10px;border:1px solid var(--ring);background:rgba(255,255,255,.05);border-radius:14px;padding:10px 12px;max-width:440px;justify-self:end}
     .search input{border:0;outline:none;background:transparent;color:var(--ink);font-size:16px;flex:1}
     .search input::placeholder{color:#c7c7ce}
+    .brand-link {
+  	display: flex;
+  	align-items: center;
+  	gap: 14px;
+  	text-decoration: none;
+  	color: inherit; /* mantiene il colore del testo */
+	}
+
+	.brand-link:hover .title {
+  	color: #7aa2ff; /* esempio: cambio colore titolo al passaggio */
+	}
+    
 
     /* ===== PROFILO ===== */
     .wrap{display:grid;grid-template-columns:320px 1fr;gap:22px;margin-top:20px}
@@ -106,14 +118,16 @@
     <!-- HEADER -->
     <header class="topbar">
       <div class="brand">
-        <img src="<%=ctx%>/img/ball.png" alt="" class="logo" />
-        <div class="brand-text">
-          <h1 class="title">SOCCERWEAR</h1>
-          <p class="subtitle">Vesti anche tu sport!</p>
-        </div>
-      </div>
+  		<a href="home.jsp" class="brand-link">
+    	<img src="img/ball.png" alt="Logo SoccerWear" class="logo" />
+    	<div class="brand-text">
+      	<h1 class="title">SOCCERWEAR</h1>
+      	<p class="subtitle">Vesti anche tu sport!</p>
+    	</div>
+  		</a>
+	</div>
       <nav class="mainnav">
-        <a href="<%=ctx%>/home.jsp" class="navlink"><i class="fa-solid fa-compass"></i>Esplora</a>
+        <a href="catalogo.jsp" class="navlink"><i class="fa-solid fa-compass"></i>Esplora</a>
         <a href="#" class="navlink"><i class="fa-solid fa-fire"></i>Novità</a>
         <a href="#" class="navlink"><i class="fa-solid fa-circle-info"></i>Info</a>
         <a href="#" class="navlink"><i class="fa-solid fa-user"></i>Profilo</a>

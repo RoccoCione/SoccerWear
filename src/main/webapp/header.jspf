@@ -1,0 +1,36 @@
+<%@ page contentType="text/html;charset=UTF-8" %>
+<%
+    model.UtenteBean u = (model.UtenteBean) session.getAttribute("utente");
+    String ctx = request.getContextPath();
+%>
+
+<header class="topbar">
+  <div class="brand">
+    <img src="<%=ctx%>/img/ball.png" alt="" class="logo" />
+    <div class="brand-text">
+      <h1 class="title">SOCCERWEAR</h1>
+      <p class="subtitle">Vesti anche tu sport!</p>
+    </div>
+  </div>
+
+  <nav class="mainnav">
+    <a href="<%=ctx%>/home.jsp" class="navlink"><i class="fa-solid fa-compass"></i>Esplora</a>
+    <a href="#" class="navlink"><i class="fa-solid fa-fire"></i>Novità</a>
+    <a href="#" class="navlink"><i class="fa-solid fa-circle-info"></i>Info</a>
+    <a href="<%=ctx%>/profile.jsp" class="navlink"><i class="fa-solid fa-user"></i>Profilo</a>
+    <a href="<%=ctx%>/logout" class="navlink"><i class="fa-solid fa-right-from-bracket"></i>Logout</a>
+  </nav>
+
+  <div class="actions">
+    <a href="#" class="cart">
+      <i class="fa-solid fa-cart-shopping"></i><span class="badge">3</span>
+    </a>
+    <div class="greeting">
+      <div class="hello">Ciao, <%= u != null ? u.getNome() : "ospite" %>!</div>
+      <div class="again">Bello rivederti!</div>
+    </div>
+    <form class="search" role="search">
+      <input name="q" type="search" placeholder="Cerca prodotti"/>
+    </form>
+  </div>
+</header>

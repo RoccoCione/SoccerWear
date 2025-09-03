@@ -26,43 +26,26 @@
 }
 
 
-    /* HEADER */
-    .topbar{ display:grid; grid-template-columns: minmax(240px, 1fr) auto minmax(360px, 1.2fr); align-items:center; gap:18px 28px; padding:18px 14px 8px; }
+    /* HEADER (come home.jsp) */
+    .topbar{display:grid;grid-template-columns:minmax(240px,1fr) auto minmax(360px,1.2fr);align-items:center;gap:18px 28px;padding:18px 14px 8px;}
     .brand{display:flex;align-items:center;gap:14px}
-    .logo{width:52px;height:52px;object-fit:cover;filter:drop-shadow(0 4px 10px rgba(0,0,0,.45))}
+    .logo{width:52px;height:52px}
     .brand-text{display:flex;flex-direction:column}
-    .title{ margin:0; font-size:clamp(22px,3.4vw,34px); font-weight:800; letter-spacing:.06em; }
-    .subtitle{ margin:.5px 0 0; color:var(--muted); font-size:13.5px; font-weight:700; }
-
-    /* NAV */
-    .mainnav{display:flex;flex-wrap:wrap;gap:26px;justify-self:center}
-    .navlink{ color:var(--accent); text-decoration:none; font-weight:800; font-size:clamp(14px,1.8vw,20px); position:relative; display:inline-flex; align-items:center; gap:8px; }
-    .navlink::after{ content:""; position:absolute; left:0;right:0;bottom:-4px;height:2px; background:currentColor;opacity:.8; transform:scaleX(1); transform-origin:left; transition:opacity .2s ease, transform .2s ease; }
-    .navlink:hover::after{opacity:1;transform:scaleX(1.06)}
-    .navlink i{ font-size:1em; }
-
-    /* ACTIONS */
-    .actions{ display:grid; grid-template-columns:auto 1fr; align-items:center; gap:14px 18px; justify-self:end; }
-    .cart{
-      position:relative; color:#fff; display:inline-flex; align-items:center; justify-content:center;
-      padding:10px; border-radius:12px; border:1px solid var(--ring); background:rgba(255,255,255,.03);
-      transition:transform .06s ease, filter .2s ease, box-shadow .2s ease; font-size:26px;
-    }
-    .cart:hover{filter:brightness(1.08)} .cart:active{transform:translateY(1px)}
-    .cart .badge{
-      position:absolute; top:4px; right:4px; background:#e63946; color:#fff; font-size:12px; font-weight:700;
-      border-radius:50%; padding:3px 6px; line-height:1; min-width:20px; text-align:center; box-shadow:0 0 6px rgba(0,0,0,.4);
-    }
-    .greeting{justify-self:end;text-align:right}
-    .greeting .hello{ font-size:clamp(18px,2.4vw,28px); font-weight:800; line-height:1.1; }
-    .greeting .again{ color:#dcdce3; font-weight:800; font-size:13px; margin-top:2px; }
-
-    /* SEARCH */
-    .search{ grid-column:1 / -1; display:flex;align-items:center;gap:10px; border:1px solid var(--ring);
-      background:rgba(255,255,255,.05); border-radius:14px;padding:10px 12px; max-width:440px;justify-self:end; }
-    .search .icon{display:inline-flex;opacity:.95}
-    .search input{ appearance:none;border:0;outline:none;background:transparent;color:var(--ink); font-size:16px;flex:1;min-width:120px; }
-    .search input::placeholder{color:#c7c7ce}
+    .title{margin:0;font-size:clamp(22px,3.4vw,34px);font-weight:800}
+    .subtitle{margin:.5px 0 0;color:var(--muted);font-size:13.5px;font-weight:700}
+    .mainnav{display:flex;gap:26px;justify-self:center}
+    .navlink{color:#fff;text-decoration:none;font-weight:800;font-size:clamp(14px,1.8vw,20px);display:inline-flex;align-items:center;gap:8px;position:relative;padding:15px}
+    .navlink::after{content:"";position:absolute;left:0;right:0;bottom:-4px;height:2px;background:currentColor;opacity:.6;transform:scaleX(0);transition:.2s}
+    .navlink:hover::after{opacity:1;transform:scaleX(1)}
+    .actions{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:14px 18px;justify-self:end}
+    .cart{position:relative;color:#fff;display:inline-flex;align-items:center;justify-content:center;padding:10px;border-radius:12px;border:1px solid var(--ring);background:rgba(255,255,255,.03);font-size:22px}
+    .cart .badge{position:absolute;top:4px;right:4px;background:#e63946;color:#fff;font-size:12px;font-weight:700;border-radius:50%;padding:3px 6px;line-height:1}
+    .greeting{text-align:right}
+    .greeting .hello{font-size:clamp(18px,2.4vw,28px);font-weight:800}
+    .greeting .again{color:#dcdce3;font-weight:800;font-size:13px;margin-top:2px}
+    .search{grid-column:1/-1;display:flex;align-items:center;gap:10px;border:1px solid var(--ring);background:rgba(255,255,255,.05);border-radius:14px;padding:10px 12px;max-width:440px;justify-self:end}
+    .search input{border:0;outline:none;background:transparent;color:var(--ink);font-size:16px;flex:1}
+    .search input::placeholder{color:#c7c7ce} 
 
     /* HERO */
     .hero{ margin-top:26px; min-height:60vh; border-radius:18px;
@@ -251,7 +234,7 @@ footer .links a:hover {
       </div>
 
       <nav class="mainnav" aria-label="Principale">
-        <a href="#" class="navlink"><i class="fa-solid fa-compass"></i>Esplora</a>
+        <a href="catalogo.jsp" class="navlink"><i class="fa-solid fa-compass"></i>Esplora</a>
         <a href="#" class="navlink"><i class="fa-solid fa-fire"></i>Novità</a>
         <a href="#" class="navlink"><i class="fa-solid fa-circle-info"></i>Info</a>
         <a href="profile.jsp" class="navlink"><i class="fa-solid fa-user"></i>Profilo</a>
