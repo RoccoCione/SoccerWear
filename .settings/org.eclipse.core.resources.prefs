@@ -1,0 +1,9 @@
+eclipse.preferences.version=1
+encoding//src/main/java/DAO/UtenteDAO.java=UTF-8
+encoding//src/main/java/control/ChangePasswordController.java=UTF-8
+encoding//src/main/java/control/LoginController.java=UTF-8
+encoding//src/main/java/control/RegisterController.java=UTF-8
+encoding//src/main/java/model/ConnectionDatabase.java=UTF-8
+encoding//src/main/java/model/UtenteBean.java=UTF-8
+encoding//src/main/webapp/home.jsp=UTF-8
+encoding/<project>=ISO-8859-1
