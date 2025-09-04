@@ -16,7 +16,12 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.2/css/all.min.css" />
   <style>
     body{margin:0;background:#111;color:#f2f2f2;font-family:Inter,system-ui,sans-serif}
-    .page{min-height:100vh;padding:28px}
+     .page {
+  		min-height: 100vh;
+  		padding: 28px 28px 40px;
+  		background: linear-gradient(180deg, #1a1a1a, #0d0d0d);
+  		overflow-x: hidden;
+		}
     .card{background:#1a1a1f;border:1px solid #2c2c39;border-radius:16px;padding:20px;margin-bottom:20px}
     table{width:100%;border-collapse:collapse;margin-top:12px}
     th,td{padding:10px;border-bottom:1px solid rgba(255,255,255,.1);text-align:left}
@@ -55,10 +60,6 @@
   	gap: 14px;
   	text-decoration: none;
   	color: inherit; /* mantiene il colore del testo */
-	}
-
-	.brand-link:hover .title {
-  	color: #7aa2ff; /* esempio: cambio colore titolo al passaggio */
 	}
 	.modal {
   display: none;

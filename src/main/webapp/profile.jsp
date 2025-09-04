@@ -164,6 +164,8 @@
         </form>
       </div>
     </header>
+    
+    <h1><i class="fa-solid fa-crown"></i> Profilo</h1>
 
     <!-- CONTENUTO PROFILO -->
     <section class="wrap">
