@@ -1,24 +1,26 @@
 package model;
 
-import java.math.BigDecimal;
-
 public class ProdottoBean {
-    private int codice;
-    private String nome;
-    private Integer numeroMaglia;
-    private BigDecimal costo;
-    private BigDecimal iva;
-    private String taglia;
-    private String categoria;
-    private String squadra;
-    private byte[] foto; // se gestisci le immagini come BLOB
+
+    private int id;                     // PK
+    private String nome;                // nome prodotto
+    private String descrizione;         // descrizione o squadra
+    private Integer numeroMaglia;       // es. 10
+    private double costo;               // prezzo listino attuale
+    private double iva;                 // percentuale IVA
+    private String taglia;              // ENUM('S','M','L','XL')
+    private String categoria;           // ENUM('SerieA','PremierLeague','LaLiga','Vintage')
+    private Integer unitaDisponibili;   // quantità stock
+    private byte[] foto;                // immagine come BLOB
+    private boolean attivo;             // 1 = attivo, 0 = disattivo
 
     // --- Getter e Setter ---
-    public int getCodice() {
-        return codice;
+
+    public int getId() {
+        return id;
     }
-    public void setCodice(int codice) {
-        this.codice = codice;
+    public void setId(int id) {
+        this.id = id;
     }
 
     public String getNome() {
@@ -28,6 +30,13 @@ public class ProdottoBean {
         this.nome = nome;
     }
 
+    public String getDescrizione() {
+        return descrizione;
+    }
+    public void setDescrizione(String descrizione) {
+        this.descrizione = descrizione;
+    }
+
     public Integer getNumeroMaglia() {
         return numeroMaglia;
     }
@@ -35,17 +44,17 @@ public class ProdottoBean {
         this.numeroMaglia = numeroMaglia;
     }
 
-    public BigDecimal getCosto() {
+    public double getCosto() {
         return costo;
     }
-    public void setCosto(BigDecimal costo) {
+    public void setCosto(double costo) {
         this.costo = costo;
     }
 
-    public BigDecimal getIva() {
+    public double getIva() {
         return iva;
     }
-    public void setIva(BigDecimal iva) {
+    public void setIva(double iva) {
         this.iva = iva;
     }
 
@@ -63,11 +72,11 @@ public class ProdottoBean {
         this.categoria = categoria;
     }
 
-    public String getSquadra() {
-        return squadra;
+    public Integer getUnitaDisponibili() {
+        return unitaDisponibili;
     }
-    public void setSquadra(String squadra) {
-        this.squadra = squadra;
+    public void setUnitaDisponibili(Integer unitaDisponibili) {
+        this.unitaDisponibili = unitaDisponibili;
     }
 
     public byte[] getFoto() {
@@ -75,5 +84,12 @@ public class ProdottoBean {
     }
     public void setFoto(byte[] foto) {
         this.foto = foto;
+    }
+
+    public boolean isAttivo() {
+        return attivo;
+    }
+    public void setAttivo(boolean attivo) {
+        this.attivo = attivo;
     }
 }

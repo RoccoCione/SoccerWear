@@ -15,8 +15,14 @@
   <style>
     :root{ --bg:#111; --panel:#0f0f14; --ring:#2c2c39; --ink:#f2f2f2; --muted:#bdbdc5; --focus:#7aa2ff; --ok:#4caf50; --bad:#ff6b6b; --radius:16px; }
     *{box-sizing:border-box}
-    body{margin:0;background:#111;color:var(--ink);font-family:"Inter",system-ui,Segoe UI,Roboto,Arial,sans-serif}
-    .page{min-height:100dvh;padding:28px;background:#111}
+    body{ margin:0; font-family:"Inter",system-ui,Segoe UI,Roboto,Arial,sans-serif; color:var(--ink); background:#111; }
+    .page {
+  		min-height: 100dvh;
+  		padding: 28px 28px 40px;
+  		background: linear-gradient(180deg, #1a1a1a, #0d0d0d);
+  		overflow-x: hidden;
+	}
+
 
    /* HEADER (come home.jsp) */
     .topbar{display:grid;grid-template-columns:minmax(240px,1fr) auto minmax(360px,1.2fr);align-items:center;gap:18px 28px;padding:18px 14px 8px;}
@@ -38,18 +44,7 @@
     .search{grid-column:1/-1;display:flex;align-items:center;gap:10px;border:1px solid var(--ring);background:rgba(255,255,255,.05);border-radius:14px;padding:10px 12px;max-width:440px;justify-self:end}
     .search input{border:0;outline:none;background:transparent;color:var(--ink);font-size:16px;flex:1}
     .search input::placeholder{color:#c7c7ce}
-    .brand-link {
-  	display: flex;
-  	align-items: center;
-  	gap: 14px;
-  	text-decoration: none;
-  	color: inherit; /* mantiene il colore del testo */
-	}
-
-	.brand-link:hover .title {
-  	color: #7aa2ff; /* esempio: cambio colore titolo al passaggio */
-	}
-    
+    .brand-link {display:flex;align-items:center;gap:14px;text-decoration:none;color:inherit}
 
     /* ===== PROFILO ===== */
     .wrap{display:grid;grid-template-columns:320px 1fr;gap:22px;margin-top:20px}
@@ -69,7 +64,18 @@
     .btn{border:1px solid var(--ring);background:#1a1a21;color:#fff;font-weight:800;padding:10px 14px;border-radius:12px;cursor:pointer}
     .btn.primary{background:#fff;color:#111}
     #pwdPanel{display:none} /* nascosto di default */
-    footer{margin-top:24px;padding-top:16px;border-top:1px solid rgba(255,255,255,.1);text-align:center;color:var(--muted);font-size:14px}
+    footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 16px;
+  background: #111; /* stesso colore del body per continuità */
+  border-top: 1px solid rgba(255,255,255,.1);
+  text-align: center;
+  color: #999;
+  font-size: 14px;
+}
     @media(max-width:980px){.wrap{grid-template-columns:1fr}.grid{grid-template-columns:1fr}}
     .alert {
   margin-top: 14px;
@@ -126,8 +132,21 @@
     	</div>
   		</a>
 	</div>
+		<%
+    	model.UtenteBean utente = (model.UtenteBean) session.getAttribute("utente");
+    	boolean isAdmin = (utente != null && "admin".equalsIgnoreCase(utente.getRuolo()));
+		%>
+	
       <nav class="mainnav">
-        <a href="catalogo.jsp" class="navlink"><i class="fa-solid fa-compass"></i>Esplora</a>
+        <% if (isAdmin) { %>
+    	<a href="<%= request.getContextPath() %>/admincatalogo.jsp" class="navlink">
+      	<i class="fa-solid fa-cog"></i> Gestione Catalogo
+    	</a>
+  		<% } else { %>
+    	<a href="<%= request.getContextPath() %>/catalogo.jsp" class="navlink">
+      	<i class="fa-solid fa-compass"></i> Esplora
+    	</a>
+  		<% } %>
         <a href="#" class="navlink"><i class="fa-solid fa-fire"></i>Novità</a>
         <a href="#" class="navlink"><i class="fa-solid fa-circle-info"></i>Info</a>
         <a href="#" class="navlink"><i class="fa-solid fa-user"></i>Profilo</a>
@@ -139,7 +158,10 @@
           <div class="hello">Ciao, <%= u.getNome() %>!</div>
           <div class="again">Bello rivederti!</div>
         </div>
-        <form class="search" role="search"><input name="q" type="search" placeholder="Cerca prodotti"/></form>
+        <form class="search" role="search" action="#" method="get">
+          <span class="icon" aria-hidden="true"><i class="fa-solid fa-magnifying-glass"></i></span>
+          <input name="q" type="search" placeholder="Cerca" aria-label="Cerca prodotti" />
+        </form>
       </div>
     </header>
 

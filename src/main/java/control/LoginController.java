@@ -49,6 +49,7 @@ public class LoginController extends HttpServlet {
             // 3a. Crea/recupera la sessione e memorizza l’utente
             HttpSession session = request.getSession();
             session.setAttribute("utente", utente);
+            session.setAttribute("ruolo", utente.getRuolo());
 
             // 3b. Migrazione trasparente:
             //     se nel DB era ancora salvata una password in chiaro,

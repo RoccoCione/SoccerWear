@@ -190,15 +190,17 @@
 }
     /* FOOTER */
 footer {
-  margin-top: 20px;
-  padding: 24px 18px;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 16px;
+  background: #111; /* stesso colore del body per continuità */
   border-top: 1px solid rgba(255,255,255,.1);
   text-align: center;
-  color: var(--muted);
+  color: #999;
   font-size: 14px;
-  background: #0d0d0d;
 }
-
 footer .links {
   margin-top: 8px;
   display: flex;
@@ -233,8 +235,20 @@ footer .links a:hover {
         </div>
       </div>
 
+	<%
+    	model.UtenteBean utente = (model.UtenteBean) session.getAttribute("utente");
+    	boolean isAdmin = (utente != null && "admin".equalsIgnoreCase(utente.getRuolo()));
+	%>
       <nav class="mainnav" aria-label="Principale">
-        <a href="catalogo.jsp" class="navlink"><i class="fa-solid fa-compass"></i>Esplora</a>
+        <% if (isAdmin) { %>
+    	<a href="<%= request.getContextPath() %>/admincatalogo.jsp" class="navlink">
+      	<i class="fa-solid fa-cog"></i> Gestione Catalogo
+    	</a>
+  		<% } else { %>
+    	<a href="<%= request.getContextPath() %>/catalogo.jsp" class="navlink">
+      	<i class="fa-solid fa-compass"></i> Esplora
+    	</a>
+  		<% } %>
         <a href="#" class="navlink"><i class="fa-solid fa-fire"></i>Novità</a>
         <a href="#" class="navlink"><i class="fa-solid fa-circle-info"></i>Info</a>
         <a href="profile.jsp" class="navlink"><i class="fa-solid fa-user"></i>Profilo</a>
