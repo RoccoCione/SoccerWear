@@ -24,6 +24,8 @@ public class AddProdottoController extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
+        request.setCharacterEncoding("UTF-8");
+
         // ✅ Solo ADMIN
         HttpSession sess = request.getSession(false);
         UtenteBean u = (sess != null) ? (UtenteBean) sess.getAttribute("utente") : null;
@@ -31,6 +33,9 @@ public class AddProdottoController extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/home.jsp");
             return;
         }
+
+        // useremo la sessione per i messaggi perché facciamo redirect (PRG)
+        HttpSession session = request.getSession();
 
         try {
             // --- Parametri dal form ---
@@ -40,9 +45,34 @@ public class AddProdottoController extends HttpServlet {
             String taglia      = getParam(request, "taglia");
             String categoria   = getParam(request, "categoria");
 
-            Double costo = parseDouble(getParam(request, "costo"));
+            Double costo = parseDouble(getParam(request, "costo")); // gestisce "12,50"
             Double iva   = parseDouble(getParam(request, "iva"));
             Integer unita = parseInteger(getParam(request, "unita_disponibili"));
+
+            // --- Validazioni minime ---
+            if (nome == null || nome.isBlank()) {
+                session.setAttribute("errore", "Il nome prodotto è obbligatorio.");
+                response.sendRedirect(request.getContextPath() + "/admincatalogo.jsp");
+                return;
+            }
+            if (costo == null || iva == null) {
+                session.setAttribute("errore", "Inserisci costo e IVA (es. 12.50).");
+                response.sendRedirect(request.getContextPath() + "/admincatalogo.jsp");
+                return;
+            }
+
+            // --- (Opzionale) Guard-rail anti-duplicato applicativo ---
+            // Se per te nome+taglia identifica una variante unica, puoi bloccare l'inserimento qui:
+            /*
+            List<ProdottoBean> esistenti = prodottoDAO.findByNome(nome);
+            boolean esisteStessaTaglia = esistenti.stream().anyMatch(pb ->
+                    taglia != null && taglia.equalsIgnoreCase(pb.getTaglia()));
+            if (esisteStessaTaglia) {
+                session.setAttribute("errore", "Esiste già una variante con stesso nome e taglia.");
+                response.sendRedirect(request.getContextPath() + "/admincatalogo.jsp");
+                return;
+            }
+            */
 
             // --- Foto (opzionale, BLOB) ---
             byte[] fotoBytes = null;
@@ -51,18 +81,6 @@ public class AddProdottoController extends HttpServlet {
                 try (InputStream is = foto.getInputStream()) {
                     fotoBytes = is.readAllBytes();
                 }
-            }
-
-            // --- Validazioni minime ---
-            if (nome == null || nome.isBlank()) {
-                request.setAttribute("errore", "Il nome prodotto è obbligatorio.");
-                request.getRequestDispatcher("/admincatalogo.jsp").forward(request, response);
-                return;
-            }
-            if (costo == null || iva == null) {
-                request.setAttribute("errore", "Inserisci costo e IVA.");
-                request.getRequestDispatcher("/admincatalogo.jsp").forward(request, response);
-                return;
             }
 
             // --- Bean ---
@@ -82,18 +100,18 @@ public class AddProdottoController extends HttpServlet {
             boolean ok = prodottoDAO.insert(p);
 
             if (ok) {
-                request.setAttribute("successo", "Prodotto inserito correttamente (ID: " + p.getId() + ").");
+                session.setAttribute("successo", "Prodotto inserito correttamente (ID: " + p.getId() + ").");
             } else {
-                request.setAttribute("errore", "Inserimento non riuscito.");
+                session.setAttribute("errore", "Inserimento non riuscito.");
             }
 
         } catch (Exception ex) {
             ex.printStackTrace();
-            request.setAttribute("errore", "Errore: " + ex.getMessage());
+            session.setAttribute("errore", "Errore: " + ex.getMessage());
         }
 
-        // Torna alla pagina admin
-        request.getRequestDispatcher("/admincatalogo.jsp").forward(request, response);
+        // ✅ PRG: Redirect (evita doppio inserimento su refresh)
+        response.sendRedirect(request.getContextPath() + "/admincatalogo.jsp");
     }
 
     // --- Utility ---
@@ -102,12 +120,14 @@ public class AddProdottoController extends HttpServlet {
         return (v != null) ? v.trim() : null;
     }
     private Integer parseInteger(String v) {
-        try { return (v == null || v.isBlank()) ? null : Integer.parseInt(v); }
+        try { return (v == null || v.isBlank()) ? null : Integer.parseInt(v.trim()); }
         catch (Exception e) { return null; }
     }
     private Double parseDouble(String v) {
-        try { return (v == null || v.isBlank()) ? null : Double.parseDouble(v); }
-        catch (Exception e) { return null; }
+        try {
+            if (v == null || v.isBlank()) return null;
+            return Double.parseDouble(v.replace(',', '.').trim());
+        } catch (Exception e) { return null; }
     }
     private String firstNonBlank(String a, String b) {
         if (a != null && !a.isBlank()) return a;

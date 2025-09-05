@@ -1,38 +1,46 @@
 package control;
 
-import java.io.IOException;
-import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import DAO.ProdottoDAO;
 import model.ProdottoBean;
 
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.*;
+import java.io.IOException;
+import java.io.OutputStream;
+
 @WebServlet("/image")
 public class ImageServlet extends HttpServlet {
-    private ProdottoDAO prodottoDAO = new ProdottoDAO();
+    private ProdottoDAO dao;
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws IOException {
-        String idStr = request.getParameter("id");
-        if (idStr == null) return;
+    public void init() {
+        dao = new ProdottoDAO();
+    }
+
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        String idStr = req.getParameter("id");
+        if (idStr == null) {
+            resp.sendError(400, "Parametro id mancante");
+            return;
+        }
 
         try {
             int id = Integer.parseInt(idStr);
-            ProdottoBean p = prodottoDAO.findById(id);
+            ProdottoBean p = dao.findById(id);
 
-            if (p != null && p.getFoto() != null) {
-                response.setContentType("image/jpeg");
-                response.setContentLength(p.getFoto().length);
-                response.getOutputStream().write(p.getFoto());
-            } else {
-                response.sendRedirect(request.getContextPath() + "/img/no-photo.png");
+            if (p == null || p.getFoto() == null) {
+                resp.sendError(404, "Immagine non trovata");
+                return;
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+
+            // Content type: se hai sempre JPEG va bene così
+            resp.setContentType("image/jpeg");
+            resp.setContentLength(p.getFoto().length);
+
+            resp.getOutputStream().write(p.getFoto());
+        } catch (NumberFormatException e) {
+            resp.sendError(400, "Parametro id non valido");
         }
     }
 }

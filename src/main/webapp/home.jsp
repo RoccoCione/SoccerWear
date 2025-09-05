@@ -166,39 +166,6 @@
   .nav{ transition:none; }
   .cta{ transition:none; }
 }
-    /* FOOTER */
-footer {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  padding: 16px;
-  background: #111; /* stesso colore del body per continuità */
-  border-top: 1px solid rgba(255,255,255,.1);
-  text-align: center;
-  color: #999;
-  font-size: 14px;
-}
-footer .links {
-  margin-top: 8px;
-  display: flex;
-  justify-content: center;
-  gap: 18px;
-  flex-wrap: wrap;
-}
-
-footer .links a {
-  color: var(--ink);
-  text-decoration: none;
-  font-weight: 600;
-  font-size: 14px;
-  transition: color .2s ease;
-}
-
-footer .links a:hover {
-  color: #fff;
-}
-    
   </style>
 </head>
 <body>

@@ -4,12 +4,13 @@ import model.ProdottoBean;
 import model.ConnectionDatabase;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class ProdottoDAO {
 
-    // ✅ Mappa una riga del ResultSet in un ProdottoBean
+    // ===============================
+    // Utility per mappare ResultSet -> Bean
+    // ===============================
     private ProdottoBean mapRow(ResultSet rs) throws SQLException {
         ProdottoBean p = new ProdottoBean();
         p.setId(rs.getInt("id"));
@@ -21,13 +22,17 @@ public class ProdottoDAO {
         p.setIva(rs.getDouble("iva"));
         p.setTaglia(rs.getString("taglia"));
         p.setCategoria(rs.getString("categoria"));
-        p.setUnitaDisponibili(rs.getInt("unita_disponibili"));
+        int unita = rs.getInt("unita_disponibili");
+        p.setUnitaDisponibili(rs.wasNull() ? null : unita);
         p.setFoto(rs.getBytes("foto"));
         p.setAttivo(rs.getBoolean("attivo"));
         return p;
     }
 
-    // ✅ Recupera tutti i prodotti attivi
+    // ===============================
+    // CRUD classico
+    // ===============================
+
     public List<ProdottoBean> findAll() {
         List<ProdottoBean> lista = new ArrayList<>();
         String sql = "SELECT * FROM prodotto WHERE attivo=1 ORDER BY updated_at DESC";
@@ -46,7 +51,6 @@ public class ProdottoDAO {
         return lista;
     }
 
-    // ✅ Trova prodotto per ID
     public ProdottoBean findById(int id) {
         String sql = "SELECT * FROM prodotto WHERE id=?";
         try (Connection con = ConnectionDatabase.getConnection();
@@ -63,9 +67,11 @@ public class ProdottoDAO {
         return null;
     }
 
-    // ✅ Inserisce nuovo prodotto
     public boolean insert(ProdottoBean p) {
-        String sql = "INSERT INTO prodotto (nome, descrizione, numero_maglia, costo, iva, taglia, categoria, unita_disponibili, foto, attivo) VALUES (?,?,?,?,?,?,?,?,?,?)";
+        String sql = """
+            INSERT INTO prodotto (nome, descrizione, numero_maglia, costo, iva, taglia, categoria, unita_disponibili, foto, attivo)
+            VALUES (?,?,?,?,?,?,?,?,?,?)
+        """;
 
         try (Connection con = ConnectionDatabase.getConnection();
              PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -82,7 +88,6 @@ public class ProdottoDAO {
             ps.setBoolean(10, p.isAttivo());
 
             int rows = ps.executeUpdate();
-
             if (rows > 0) {
                 try (ResultSet keys = ps.getGeneratedKeys()) {
                     if (keys.next()) p.setId(keys.getInt(1));
@@ -96,9 +101,12 @@ public class ProdottoDAO {
         return false;
     }
 
-    // ✅ Aggiorna un prodotto
     public boolean update(ProdottoBean p) {
-        String sql = "UPDATE prodotto SET nome=?, descrizione=?, numero_maglia=?, costo=?, iva=?, taglia=?, categoria=?, unita_disponibili=?, foto=?, attivo=? WHERE id=?";
+        String sql = """
+            UPDATE prodotto
+            SET nome=?, descrizione=?, numero_maglia=?, costo=?, iva=?, taglia=?, categoria=?, unita_disponibili=?, foto=?, attivo=?
+            WHERE id=?
+        """;
 
         try (Connection con = ConnectionDatabase.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
@@ -123,9 +131,8 @@ public class ProdottoDAO {
         return false;
     }
 
-    // ✅ Cancella un prodotto (soft delete → attivo=0)
     public boolean delete(int id) {
-        String sql = "UPDATE prodotto SET attivo=0 WHERE id=?";
+        String sql = "DELETE FROM prodotto WHERE id=?";
         try (Connection con = ConnectionDatabase.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setInt(1, id);
@@ -135,4 +142,132 @@ public class ProdottoDAO {
             return false;
         }
     }
+
+    // ===============================
+    // Metodi per catalogo cliente
+    // ===============================
+
+    // tutte le varianti di un prodotto per nome
+    public List<ProdottoBean> findByNome(String nome) {
+        List<ProdottoBean> lista = new ArrayList<>();
+        String sql = "SELECT * FROM prodotto WHERE attivo=1 AND nome=? ORDER BY FIELD(taglia,'S','M','L','XL')";
+        try (Connection con = ConnectionDatabase.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, nome);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) lista.add(mapRow(rs));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return lista;
+    }
+
+    // mappa taglie → stock
+    public Map<String, Integer> findTaglieDisponibiliByNome(String nome) {
+        Map<String, Integer> out = new LinkedHashMap<>();
+        String sql = """
+            SELECT taglia, SUM(unita_disponibili) AS stock
+            FROM prodotto
+            WHERE attivo=1 AND nome=?
+            GROUP BY taglia
+            ORDER BY FIELD(taglia,'S','M','L','XL')
+        """;
+        try (Connection con = ConnectionDatabase.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, nome);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    out.put(rs.getString("taglia"), rs.getInt("stock"));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return out;
+    }
+
+    // una variante rappresentativa per nome (per card catalogo)
+    public ProdottoBean findFirstVariantByNome(String nome) {
+        String sql = "SELECT * FROM prodotto WHERE attivo=1 AND nome=? ORDER BY id LIMIT 1";
+        try (Connection con = ConnectionDatabase.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, nome);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return mapRow(rs);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    // foto per id (per servlet /image?id=...)
+    public byte[] findFotoById(int id) {
+        String sql = "SELECT foto FROM prodotto WHERE id=?";
+        try (Connection con = ConnectionDatabase.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getBytes(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+    
+ // ✅ Prezzo crescente
+    public List<ProdottoBean> findAllOrderByPrezzoAsc() {
+        return findAllWithOrder("ASC");
+    }
+
+    // ✅ Prezzo decrescente
+    public List<ProdottoBean> findAllOrderByPrezzoDesc() {
+        return findAllWithOrder("DESC");
+    }
+
+    // Helper privato
+    private List<ProdottoBean> findAllWithOrder(String order) {
+        List<ProdottoBean> lista = new ArrayList<>();
+        String sql = "SELECT * FROM prodotto WHERE attivo=1 ORDER BY costo " + order;
+
+        try (Connection con = ConnectionDatabase.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                lista.add(mapRow(rs));
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return lista;
+    }
+    
+ // ✅ Trova tutti i prodotti attivi filtrati per categoria
+    public List<ProdottoBean> findAllByCategoria(String categoria) {
+        List<ProdottoBean> lista = new ArrayList<>();
+        String sql = "SELECT * FROM prodotto WHERE attivo=1 AND categoria=?";
+
+        try (Connection con = ConnectionDatabase.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setString(1, categoria);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    lista.add(mapRow(rs));
+                }
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return lista;
+    }
+
+
 }

@@ -130,31 +130,40 @@
     <!-- CATALOGO -->
     <main class="catalogo">
       <div class="grid">
-        <% if (prodotti != null && !prodotti.isEmpty()) {
-             for (ProdottoBean p : prodotti) { %>
-          <div class="card">
-            <% if (p.getFoto() != null) { %>
-              <img src="data:image/jpeg;base64,<%= java.util.Base64.getEncoder().encodeToString(p.getFoto()) %>" alt="Immagine <%= p.getNome() %>">
-            <% } else { %>
-              <img src="<%=ctx%>/img/no-photo.png" alt="Nessuna immagine">
-            <% } %>
-            <div class="card-body">
-              <div class="name"><%= p.getNome() %></div>
-              <div>
-                <div class="price"><%= String.format(java.util.Locale.ITALY, "%.2f", p.getCosto()) %> €</div>
-                <a href="javascript:void(0)" class="btn" onclick="openDetailsById(<%= p.getId() %>)">
-                  <i class="fa-solid fa-eye"></i> Dettagli
-                </a>
-                <form action="<%=ctx%>/cart/add" method="post" style="margin-top:6px;">
-                  <input type="hidden" name="id" value="<%=p.getId()%>">
-                  <button type="submit" class="btn"><i class="fa-solid fa-cart-plus"></i> Aggiungi al carrello</button>
-                </form>
-              </div>
-            </div>
-          </div>
-        <% } } else { %>
-          <p style="text-align:center;width:100%;">Nessun prodotto disponibile.</p>
-        <% } %>
+        <% if (prodotti != null && !prodotti.isEmpty()) { %>
+  <%
+    Set<String> nomiVisti = new HashSet<>();
+    for (ProdottoBean p : prodotti) {
+      if (p.getNome() == null) continue;
+      if (nomiVisti.contains(p.getNome())) continue;
+      nomiVisti.add(p.getNome());
+  %>
+    <div class="card">
+      <% if (p.getFoto() != null) { %>
+        <img src="data:image/jpeg;base64,<%= java.util.Base64.getEncoder().encodeToString(p.getFoto()) %>" alt="Immagine <%= p.getNome() %>">
+      <% } else { %>
+        <img src="<%=ctx%>/img/no-photo.png" alt="Nessuna immagine">
+      <% } %>
+      <div class="card-body">
+        <div class="name"><%= p.getNome() %></div>
+        <div>
+          <div class="price"><%= String.format(java.util.Locale.ITALY, "%.2f", p.getCosto()) %> €</div>
+          <a href="javascript:void(0)" class="btn" onclick="openDetailsById(<%= p.getId() %>)">
+            <i class="fa-solid fa-eye"></i> Dettagli
+          </a>
+          <form action="<%=ctx%>/cart/add" method="post" style="margin-top:6px;">
+            <input type="hidden" name="id" value="<%=p.getId()%>">
+            <button type="submit" class="btn"><i class="fa-solid fa-cart-plus"></i> Aggiungi al carrello</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  <%
+    } // fine for
+  %>
+<% } else { %>
+  <p style="text-align:center;width:100%;color:#FFF">Nessun prodotto disponibile.</p>
+<% } %>
       </div>
     </main>
 

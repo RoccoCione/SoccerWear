@@ -1,3 +1,4 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%
     model.UtenteBean u = (model.UtenteBean) session.getAttribute("utente");
     String ctx = request.getContextPath();
@@ -67,7 +68,11 @@
     	</a>
   		<% } %>
         <a href="#" class="navlink"><i class="fa-solid fa-circle-info"></i>Info</a>
-        <a href="profile.jsp" class="navlink"><i class="fa-solid fa-user"></i>Profilo</a>
+         <% if (u != null) { %>
+    	<a href="profile.jsp" class="navlink"><i class="fa-solid fa-user"></i>Profilo</a>
+  		<% } else { %>
+    	<a href="errore.jsp" class="navlink"><i class="fa-solid fa-user"></i>Profilo</a>
+  		<% } %>
         <% if (u != null) { %>
     	<a href="<%=ctx%>/logout" class="navlink"><i class="fa-solid fa-person-walking-luggage"></i>Logout</a>
   		<% } else { %>
@@ -75,7 +80,9 @@
   		<% } %>
       </nav>
       <div class="actions">
+      <% if (!isAdmin) { %>
         <a href="#" class="cart"><i class="fa-solid fa-cart-shopping"></i><span class="badge">3</span></a>
+        <% } %>
         <div class="greeting">
           <div class="hello">
           <i class="fa-solid fa-child-reaching"></i>
