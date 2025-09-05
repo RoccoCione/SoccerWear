@@ -12,6 +12,8 @@ import javax.servlet.http.HttpSession;
 
 import DAO.UtenteDAO;
 import model.UtenteBean;
+import model.Cart;
+import model.CartService;
 import model.PasswordUtils;
 
 /**
@@ -61,6 +63,16 @@ public class LoginController extends HttpServlet {
 
             // 3c. Redirect alla home page protetta
             response.sendRedirect("home.jsp");
+            
+         // dopo login successo
+            Cart sessionCart = (Cart) session.getAttribute("cart");
+            if (sessionCart == null) sessionCart = new Cart();
+
+            CartService cs = new CartService();
+            Cart merged = cs.mergeSessionWithDb(utente.getId(), sessionCart);
+
+            // metti in sessione il carrello “ufficiale”
+            session.setAttribute("cart", merged);
 
         } else {
             // 4. Credenziali non valide:

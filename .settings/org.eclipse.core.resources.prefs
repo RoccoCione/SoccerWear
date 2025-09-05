@@ -1,12 +1,16 @@
 eclipse.preferences.version=1
+encoding//src/main/java/DAO/CartPersistenceDAO.java=UTF-8
 encoding//src/main/java/DAO/ProdottoDAO.java=UTF-8
 encoding//src/main/java/DAO/UtenteDAO.java=UTF-8
 encoding//src/main/java/control/AddProdottoController.java=UTF-8
+encoding//src/main/java/control/CartController.java=UTF-8
 encoding//src/main/java/control/ChangePasswordController.java=UTF-8
 encoding//src/main/java/control/EditProdottoController.java=UTF-8
 encoding//src/main/java/control/LoginController.java=UTF-8
 encoding//src/main/java/control/ProductApiController.java=UTF-8
 encoding//src/main/java/control/RegisterController.java=UTF-8
+encoding//src/main/java/model/CartItem.java=UTF-8
+encoding//src/main/java/model/CartService.java=UTF-8
 encoding//src/main/java/model/ConnectionDatabase.java=UTF-8
 encoding//src/main/java/model/UtenteBean.java=UTF-8
 encoding//src/main/webapp/errore.jsp=UTF-8

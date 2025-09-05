@@ -79,7 +79,7 @@
   
     <%@ include file="header.jspf" %>
     
-    <h1 style="text-align:center;margin-bottom:20px;color:#FFFFFF">Catalogo prodotti</h1>
+    <h1 style="text-align:center;margin-bottom:20px;color:#FFFFFF"><i class="fa-solid fa-compass"></i> Catalogo prodotti</h1>
 
     <!-- Barra filtri: ogni form conserva gli altri parametri -->
     <div class="filter-bar">
@@ -196,9 +196,20 @@
             </div>
 
             <div style="margin-top:16px;">
-              <label style="font-weight:800;">Quantità</label>
-              <input type="number" id="modalQty" name="quantita" value="1" min="1" style="width:80px;padding:8px;border:1px solid #ccc;border-radius:8px;margin-left:8px;">
-            </div>
+  				<label style="font-weight:800;">Quantità</label>
+  				<div style="display:flex;align-items:center;gap:8px;margin-top:6px;">
+   				<button type="button" id="qtyDec"
+            		style="width:36px;height:36px;border:1px solid #ccc;border-radius:10px;background:#fff;cursor:pointer;font-weight:900;">−</button>
+
+    			<input type="number" id="modalQty" name="quantita" value="1" min="1"
+           			style="width:90px;padding:8px;border:1px solid #ccc;border-radius:8px;text-align:center;">
+
+    			<button type="button" id="qtyInc"
+            		style="width:36px;height:36px;border:1px solid #ccc;border-radius:10px;background:#fff;cursor:pointer;font-weight:900;">+</button>
+
+   				 <span id="qtyHint" style="color:#666;font-size:13px;margin-left:6px;"></span>
+  				</div>
+			</div>
 
             <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap;">
               <form id="modalAddToCart" action="<%=ctx%>/cart/add" method="post" onsubmit="return beforeAddToCart();">
@@ -222,69 +233,260 @@
     </div>
 
     <script>
-      let selectedSize = null;
+  let selectedSize = null;
+  let stockBySize = {};      // mappa { S: n, M: n, ... } dal backend
+  let currentMax = 1;        // limite max per la taglia corrente
 
-      function closeProductModal(){ document.getElementById('productModal').style.display='none'; }
-      window.addEventListener('click', (e) => { const m=document.getElementById('productModal'); if(e.target===m) closeProductModal(); });
+  function closeProductModal(){
+    document.getElementById('productModal').style.display='none';
+  }
+  window.addEventListener('click', (e) => {
+    const m=document.getElementById('productModal');
+    if(e.target===m) closeProductModal();
+  });
 
-      function beforeAddToCart(){
-        if(!selectedSize){ alert('Seleziona una taglia.'); return false; }
-        document.getElementById('modalSize').value = selectedSize;
-        document.getElementById('modalHiddenName').value   = document.getElementById('modalCustomName').value.trim();
-        document.getElementById('modalHiddenNumber').value = document.getElementById('modalCustomNumber').value.trim();
-        document.getElementById('modalHiddenQty').value    = document.getElementById('modalQty').value;
-        return true;
-      }
+  // Aggiorna limiti e UI della quantità in base alla taglia selezionata
+  function updateQtyLimits(){
+    const qtyInput = document.getElementById('modalQty');
+    const hint     = document.getElementById('qtyHint');
 
-      async function openDetailsById(id){
-        try{
-          const res = await fetch('<%=ctx%>/api/product?id=' + encodeURIComponent(id));
-          const json = await res.json();
-          if(!json.success){ alert(json.error || 'Errore'); return; }
-          const d = json.data;
+    currentMax = (selectedSize && stockBySize[selectedSize]) ? stockBySize[selectedSize] : 1;
+    if (!Number.isFinite(currentMax) || currentMax < 1) currentMax = 1;
 
-          document.getElementById('modalPid').value = id;
-          document.getElementById('modalTitle').textContent = d.nome || '';
-          document.getElementById('modalDesc').textContent  = d.descrizione || '';
-          document.getElementById('modalCat').textContent   = d.categoria || '';
-          document.getElementById('modalPrice').textContent = Number(d.prezzo).toFixed(2) + ' € + IVA';
+    qtyInput.min = 1;
+    qtyInput.max = currentMax;
 
-          const img = document.getElementById('modalImg');
-          img.src = d.imageUrl || '<%=ctx%>/img/no-photo.png';
-          img.onerror = () => { img.src = '<%=ctx%>/img/no-photo.png'; };
+    // clamp valore corrente
+    let v = parseInt(qtyInput.value || '1', 10);
+    if (v < 1) v = 1;
+    if (v > currentMax) v = currentMax;
+    qtyInput.value = v;
 
-          const wrap = document.getElementById('modalTaglie');
-          wrap.innerHTML = '';
-          selectedSize = null;
-          const taglie = d.taglie || {};
-          ['S','M','L','XL'].forEach(t => {
-            const stock = taglie[t] || 0;
-            const btn = document.createElement('button');
-            btn.type = 'button';
-            btn.textContent = t + (stock>0 ? ` (${stock})` : ' (0)');
-            btn.style.cssText = 'padding:8px 12px;border-radius:999px;border:1px solid #111;background:#fff;color:#111;font-weight:800;cursor:pointer;';
-            if (stock <= 0){
-              btn.disabled = true; btn.style.opacity = '0.5'; btn.style.cursor = 'not-allowed';
-            } else {
-              btn.addEventListener('click', () => {
-                [...wrap.children].forEach(c => c.style.outline = 'none');
-                btn.style.outline = '3px solid #0d47a1';
-                selectedSize = t;
-              });
-            }
-            wrap.appendChild(btn);
+    // messaggino di aiuto
+    hint.textContent = `(max ${currentMax})`;
+  }
+
+  // Pulsanti + / -
+  function attachQtyControls(){
+    const dec = document.getElementById('qtyDec');
+    const inc = document.getElementById('qtyInc');
+    const qty = document.getElementById('modalQty');
+
+    // rimuovi eventuali handler precedenti
+    dec.onclick = null; inc.onclick = null;
+    qty.oninput = null;
+
+    dec.onclick = () => {
+      let v = parseInt(qty.value || '1', 10);
+      v = isNaN(v) ? 1 : v;
+      if (v > 1) v--;
+      qty.value = v;
+    };
+    inc.onclick = () => {
+      let v = parseInt(qty.value || '1', 10);
+      v = isNaN(v) ? 1 : v;
+      const max = parseInt(qty.max || currentMax, 10);
+      if (v < max) v++;
+      qty.value = v;
+    };
+    qty.oninput = () => {
+      // forza i limiti anche digitando a mano
+      let v = parseInt(qty.value || '1', 10);
+      if (isNaN(v) || v < 1) v = 1;
+      if (v > currentMax) v = currentMax;
+      qty.value = v;
+    };
+  }
+
+  function beforeAddToCart(){
+    if(!selectedSize){
+      alert('Seleziona una taglia.');
+      return false;
+    }
+    const qtyInput = document.getElementById('modalQty');
+    const q = parseInt(qtyInput.value || '1', 10);
+    if (!Number.isFinite(q) || q < 1) {
+      alert('Quantità non valida.');
+      return false;
+    }
+    if (q > currentMax) {
+      alert(`Disponibilità insufficiente per la taglia ${selectedSize}. Max acquistabile: ${currentMax}.`);
+      return false;
+    }
+
+    document.getElementById('modalSize').value        = selectedSize;
+    document.getElementById('modalHiddenName').value  = document.getElementById('modalCustomName').value.trim();
+    document.getElementById('modalHiddenNumber').value= document.getElementById('modalCustomNumber').value.trim();
+    document.getElementById('modalHiddenQty').value   = q;
+    return true;
+  }
+
+  async function openDetailsById(id){
+    try{
+      const res  = await fetch('<%=ctx%>/api/product?id=' + encodeURIComponent(id));
+      const json = await res.json();
+      if(!json.success){ alert(json.error || 'Errore'); return; }
+      const d = json.data;
+
+      document.getElementById('modalPid').value = id;
+      document.getElementById('modalTitle').textContent = d.nome || '';
+      document.getElementById('modalDesc').textContent  = d.descrizione || '';
+      document.getElementById('modalCat').textContent   = d.categoria || '';
+      document.getElementById('modalPrice').textContent = Number(d.prezzo).toFixed(2) + ' € + IVA';
+
+      const img = document.getElementById('modalImg');
+      img.src = d.imageUrl || '<%=ctx%>/img/no-photo.png';
+      img.onerror = () => { img.src = '<%=ctx%>/img/no-photo.png'; };
+
+      // Prepara taglie & quantità
+      const wrap = document.getElementById('modalTaglie');
+      wrap.innerHTML = '';
+      selectedSize = null;
+
+      // salva mappa stock
+      stockBySize = d.taglie || {}; // es: {S:5,M:0,L:3,XL:2}
+      attachQtyControls();           // collega i bottoni
+      currentMax = 1;
+      updateQtyLimits();             // reset limiti iniziali
+
+      // crea pulsanti taglia
+      ['S','M','L','XL'].forEach(t => {
+        const stock = stockBySize[t] || 0;
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.textContent = t + (stock>0 ? ` (${stock})` : ' (0)');
+        btn.style.cssText = 'padding:8px 12px;border-radius:999px;border:1px solid #111;background:#fff;color:#111;font-weight:800;cursor:pointer;';
+        if (stock <= 0){
+          btn.disabled = true;
+          btn.style.opacity = '0.5';
+          btn.style.cursor = 'not-allowed';
+        } else {
+          btn.addEventListener('click', () => {
+            // deseleziona visivamente gli altri
+            [...wrap.children].forEach(c => c.style.outline = 'none');
+            btn.style.outline = '3px solid #0d47a1';
+            selectedSize = t;
+            // aggiorna limiti quantità per questa taglia
+            updateQtyLimits();
           });
-
-          document.getElementById('productModal').style.display = 'block';
-        }catch(err){
-          console.error(err);
-          alert('Errore nel caricamento dettagli.');
         }
+        wrap.appendChild(btn);
+      });
+
+      document.getElementById('productModal').style.display = 'block';
+    }catch(err){
+      console.error(err);
+      alert('Errore nel caricamento dettagli.');
+    }
+  }
+</script>
+<script>
+  // === Dialoghi custom ===
+  function openConfirm(message){
+    return new Promise((resolve) => {
+      const modal = document.getElementById('confirmDialog');
+      const msg   = document.getElementById('confirmMessage');
+      const okBtn = document.getElementById('confirmOk');
+      const noBtn = document.getElementById('confirmCancel');
+
+      msg.textContent = message || 'Confermi?';
+      modal.style.display = 'block';
+      modal.setAttribute('aria-hidden','false');
+
+      const close = (ans) => {
+        modal.style.display = 'none';
+        modal.setAttribute('aria-hidden','true');
+        okBtn.onclick = noBtn.onclick = null;
+        modal.onclick = null;
+        resolve(ans);
+      };
+
+      okBtn.onclick = () => close(true);
+      noBtn.onclick = () => close(false);
+      modal.onclick = (e) => { if (e.target === modal) close(false); };
+    });
+  }
+
+  function openAlert(message, title){
+    const modal = document.getElementById('alertDialog');
+    const msg   = document.getElementById('alertMessage');
+    const okBtn = document.getElementById('alertOk');
+    if (title){
+      modal.querySelector('.dialog-header strong').textContent = title;
+    }
+    msg.textContent = message || '';
+    modal.style.display = 'block';
+    modal.setAttribute('aria-hidden','false');
+
+    const close = () => {
+      modal.style.display = 'none';
+      modal.setAttribute('aria-hidden','true');
+      okBtn.onclick = null;
+      modal.onclick = null;
+    };
+    okBtn.onclick = close;
+    modal.onclick = (e) => { if (e.target === modal) close(); };
+  }
+
+  // === Hook rimozione singolo articolo (usa confirm custom) ===
+  document.querySelectorAll('.remove-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const idx = btn.getAttribute('data-idx');
+      const ok = await openConfirm('Rimuovere questo articolo dal carrello?');
+      if (ok) {
+        // invia la form più vicina
+        btn.closest('form').submit();
       }
-    </script>
+    });
+  });
+
+  // === Hook "Svuota carrello" ===
+  const clearBtn = document.getElementById('btnClearCart');
+  if (clearBtn) {
+    clearBtn.addEventListener('click', async () => {
+      const ok = await openConfirm('Svuotare completamente il carrello?');
+      if (ok) window.location.href = '<%=ctx%>/cart/clear';
+    });
+  }
+</script>
+
 
     <%@ include file="footer.jspf" %>
     
   </div>
+<!-- Dialogo conferma (riutilizzabile) -->
+<div id="confirmDialog" class="dialog-backdrop" role="dialog" aria-modal="true" aria-hidden="true">
+  <div class="dialog">
+    <div class="dialog-header">
+      <div class="icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+      <strong>Confermi l’azione?</strong>
+    </div>
+    <div class="dialog-body">
+      <p id="confirmMessage">Sei sicuro?</p>
+    </div>
+    <div class="dialog-footer">
+      <button type="button" class="btn btn-ghost" id="confirmCancel">Annulla</button>
+      <button type="button" class="btn btn-danger" id="confirmOk">Conferma</button>
+    </div>
+  </div>
+</div>
+
+<!-- Dialogo info (per messaggi o piccoli alert) -->
+<div id="alertDialog" class="dialog-backdrop" role="dialog" aria-modal="true" aria-hidden="true">
+  <div class="dialog">
+    <div class="dialog-header">
+      <div class="icon" style="background:#eef6ff;border-color:#b6d7ff;color:#0b5ed7">
+        <i class="fa-solid fa-circle-info"></i>
+      </div>
+      <strong>Attenzione</strong>
+    </div>
+    <div class="dialog-body">
+      <p id="alertMessage">Messaggio…</p>
+    </div>
+    <div class="dialog-footer">
+      <button type="button" class="btn btn-primary" id="alertOk">Ok</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>

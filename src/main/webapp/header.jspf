@@ -60,11 +60,11 @@
   		<% } %>
         <% if (isAdmin) { %>
     	<a href="<%= request.getContextPath() %>/gestioneordini.jsp" class="navlink">
-      	<i class="fa-solid fa-truck"></i></i> Gestione Ordini
+      	<i class="fa-solid fa-truck"></i>Gestione Ordini</i> 
     	</a>
   		<% } else { %>
     	<a href="<%= request.getContextPath() %>/novita.jsp" class="navlink">
-      	<i class="fa-solid fa-award"></i></i> Ultimi Arrivi
+      	<i class="fa-solid fa-award"></i> Ultimi Arrivi</i>
     	</a>
   		<% } %>
         <a href="#" class="navlink"><i class="fa-solid fa-circle-info"></i>Info</a>
@@ -80,9 +80,16 @@
   		<% } %>
       </nav>
       <div class="actions">
-      <% if (!isAdmin) { %>
-        <a href="#" class="cart"><i class="fa-solid fa-cart-shopping"></i><span class="badge">3</span></a>
-        <% } %>
+      	<% if (!isAdmin) { %>
+       <a href="<%=ctx%>/carrello.jsp" class="cart" aria-label="Carrello">
+  		<i class="fa-solid fa-cart-shopping"></i>
+  		<%
+    	model.Cart _cart = (model.Cart) session.getAttribute("cart");
+    	int _count = (_cart != null) ? _cart.getItemCount() : 0;
+  		%>
+  		<span class="badge"><%= _count %></span>
+		</a>
+       	<% } %>
         <div class="greeting">
           <div class="hello">
           <i class="fa-solid fa-child-reaching"></i>

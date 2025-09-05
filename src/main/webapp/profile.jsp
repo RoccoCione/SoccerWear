@@ -86,7 +86,7 @@
   
     <%@ include file="header.jspf" %>
     
-    <h1><i class="fa-solid fa-crown"></i> Profilo</h1>
+    <h1 style="text-align:center;margin-bottom:20px;color:#FFFFFF"><i class="fa-solid fa-crown"></i> Profilo</h1>
 
     <!-- CONTENUTO PROFILO -->
     <section class="wrap">

@@ -2,13 +2,13 @@ Per superare la discussione del progetto devono essere seguite nel dettaglio le 
 
 Il sito deve essere di commercio elettronico:
 
-- il cliente deve poter inserire prodotti nel carrello, variarne la quantità.
+** il cliente deve poter inserire prodotti nel carrello, variarne la quantità.
 
 Una volta confermato l'ordine deve essere possibile visualizzare l'ordine nell'elenco degli ordini effettuati e va svuotato il carrello. 
 
 ** il prodotto viene visualizzato nel catalogo. si può selezionare per avere una descrizione dettagliata.
 
-**Va prevista la figura dell'amministratore e delle pagine a lui dedicate, accessibili solo dopo autenticazione (vedere lezione su Security). 
+** Va prevista la figura dell'amministratore e delle pagine a lui dedicate, accessibili solo dopo autenticazione (vedere lezione su Security). 
 
 Usare autenticazione programmata.
 
@@ -42,7 +42,7 @@ usare i filtri +++ NEW +++
 
 ·     Usare AJAX per scambiare piccole informazioni con il server (in formato JSON) 
 
-       Almeno: utilizzare ajax per la barra di ricerca (come in google suggest) e controllare durante la registrazione che l'email non è già presente nel database
+       Almeno: utilizzare ajax per la barra di ricerca (come in google suggest)
 
 ·     Gestire le sessioni per memorizzare il carrello. Si salva l'ordine nel DB dopo l'acquisto.
 
