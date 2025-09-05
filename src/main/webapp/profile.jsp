@@ -1,9 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%
-  model.UtenteBean u = (model.UtenteBean) session.getAttribute("utente");
-  if (u == null) { response.sendRedirect(request.getContextPath() + "/login.jsp"); return; }
-  String ctx = request.getContextPath();
-%>
+
 <!doctype html>
 <html lang="it">
 <head>
@@ -23,29 +19,6 @@
   		overflow-x: hidden;
 	}
 
-
-   /* HEADER (come home.jsp) */
-    .topbar{display:grid;grid-template-columns:minmax(240px,1fr) auto minmax(360px,1.2fr);align-items:center;gap:18px 28px;padding:18px 14px 8px;}
-    .brand{display:flex;align-items:center;gap:14px}
-    .logo{width:52px;height:52px}
-    .brand-text{display:flex;flex-direction:column}
-    .title{margin:0;font-size:clamp(22px,3.4vw,34px);font-weight:800}
-    .subtitle{margin:.5px 0 0;color:var(--muted);font-size:13.5px;font-weight:700}
-    .mainnav{display:flex;gap:26px;justify-self:center}
-    .navlink{color:#fff;text-decoration:none;font-weight:800;font-size:clamp(14px,1.8vw,20px);display:inline-flex;align-items:center;gap:8px;position:relative;padding:15px}
-    .navlink::after{content:"";position:absolute;left:0;right:0;bottom:-4px;height:2px;background:currentColor;opacity:.6;transform:scaleX(0);transition:.2s}
-    .navlink:hover::after{opacity:1;transform:scaleX(1)}
-    .actions{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:14px 18px;justify-self:end}
-    .cart{position:relative;color:#fff;display:inline-flex;align-items:center;justify-content:center;padding:10px;border-radius:12px;border:1px solid var(--ring);background:rgba(255,255,255,.03);font-size:22px}
-    .cart .badge{position:absolute;top:4px;right:4px;background:#e63946;color:#fff;font-size:12px;font-weight:700;border-radius:50%;padding:3px 6px;line-height:1}
-    .greeting{text-align:right}
-    .greeting .hello{font-size:clamp(18px,2.4vw,28px);font-weight:800}
-    .greeting .again{color:#dcdce3;font-weight:800;font-size:13px;margin-top:2px}
-    .search{grid-column:1/-1;display:flex;align-items:center;gap:10px;border:1px solid var(--ring);background:rgba(255,255,255,.05);border-radius:14px;padding:10px 12px;max-width:440px;justify-self:end}
-    .search input{border:0;outline:none;background:transparent;color:var(--ink);font-size:16px;flex:1}
-    .search input::placeholder{color:#c7c7ce}
-    .brand-link {display:flex;align-items:center;gap:14px;text-decoration:none;color:inherit}
-
     /* ===== PROFILO ===== */
     .wrap{display:grid;grid-template-columns:320px 1fr;gap:22px;margin-top:20px}
     .card{background:linear-gradient(180deg,#15151d,#0d0d13);border:1px solid var(--ring);border-radius:var(--radius);padding:20px}
@@ -64,18 +37,7 @@
     .btn{border:1px solid var(--ring);background:#1a1a21;color:#fff;font-weight:800;padding:10px 14px;border-radius:12px;cursor:pointer}
     .btn.primary{background:#fff;color:#111}
     #pwdPanel{display:none} /* nascosto di default */
-    footer {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  padding: 16px;
-  background: #111; /* stesso colore del body per continuità */
-  border-top: 1px solid rgba(255,255,255,.1);
-  text-align: center;
-  color: #999;
-  font-size: 14px;
-}
+
     @media(max-width:980px){.wrap{grid-template-columns:1fr}.grid{grid-template-columns:1fr}}
     .alert {
   margin-top: 14px;
@@ -121,49 +83,8 @@
 <% } %>
 
   <div class="page">
-    <!-- HEADER -->
-    <header class="topbar">
-      <div class="brand">
-  		<a href="home.jsp" class="brand-link">
-    	<img src="img/ball.png" alt="Logo SoccerWear" class="logo" />
-    	<div class="brand-text">
-      	<h1 class="title">SOCCERWEAR</h1>
-      	<p class="subtitle">Vesti anche tu sport!</p>
-    	</div>
-  		</a>
-	</div>
-		<%
-    	model.UtenteBean utente = (model.UtenteBean) session.getAttribute("utente");
-    	boolean isAdmin = (utente != null && "admin".equalsIgnoreCase(utente.getRuolo()));
-		%>
-	
-      <nav class="mainnav">
-        <% if (isAdmin) { %>
-    	<a href="<%= request.getContextPath() %>/admincatalogo.jsp" class="navlink">
-      	<i class="fa-solid fa-cog"></i> Gestione Catalogo
-    	</a>
-  		<% } else { %>
-    	<a href="<%= request.getContextPath() %>/catalogo.jsp" class="navlink">
-      	<i class="fa-solid fa-compass"></i> Esplora
-    	</a>
-  		<% } %>
-        <a href="#" class="navlink"><i class="fa-solid fa-fire"></i>Novità</a>
-        <a href="#" class="navlink"><i class="fa-solid fa-circle-info"></i>Info</a>
-        <a href="#" class="navlink"><i class="fa-solid fa-user"></i>Profilo</a>
-        <a href="<%=ctx%>/logout" class="navlink"><i class="fa-solid fa-right-from-bracket"></i>Logout</a>
-      </nav>
-      <div class="actions">
-        <a href="#" class="cart"><i class="fa-solid fa-cart-shopping"></i><span class="badge">3</span></a>
-        <div class="greeting">
-          <div class="hello">Ciao, <%= u.getNome() %>!</div>
-          <div class="again">Bello rivederti!</div>
-        </div>
-        <form class="search" role="search" action="#" method="get">
-          <span class="icon" aria-hidden="true"><i class="fa-solid fa-magnifying-glass"></i></span>
-          <input name="q" type="search" placeholder="Cerca" aria-label="Cerca prodotti" />
-        </form>
-      </div>
-    </header>
+  
+    <%@ include file="header.jspf" %>
     
     <h1><i class="fa-solid fa-crown"></i> Profilo</h1>
 
@@ -229,11 +150,9 @@
     <%= request.getAttribute("successo") %>
   </div>
 <% } %>
-
-          
+   
         </section>
-
-        <footer>© 2025 SoccerWear — Profilo</footer>
+		<%@ include file="footer.jspf" %>
       </main>
     </section>
   </div>

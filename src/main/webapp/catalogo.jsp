@@ -1,9 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="java.util.*, model.ProdottoBean, model.UtenteBean, DAO.ProdottoDAO" %>
 <%
-    String ctx = request.getContextPath();
-    UtenteBean u = (UtenteBean) session.getAttribute("utente");
-
+    
     // Parametri filtro/ordinamento
     String order     = request.getParameter("order");       // priceAsc | priceDesc | null
     String categoria = request.getParameter("categoria");   // SerieA | PremierLeague | LaLiga | Vintage | null
@@ -50,28 +48,6 @@
     body{ margin:0; font-family:"Inter",system-ui,Segoe UI,Roboto,Arial,sans-serif; color:var(--ink); background:#111; }
     .page{ min-height:100vh; padding:28px 28px 40px; background:linear-gradient(180deg,#1a1a1a,#0d0d0d); overflow-x:hidden; }
 
-    /* HEADER */
-    .topbar{display:grid;grid-template-columns:minmax(240px,1fr) auto minmax(360px,1.2fr);align-items:center;gap:18px 28px;padding:18px 14px 8px;color:#fff}
-    .brand{display:flex;align-items:center;gap:14px}
-    .logo{width:52px;height:52px}
-    .brand-text{display:flex;flex-direction:column}
-    .title{margin:0;font-size:clamp(22px,3.4vw,34px);font-weight:800}
-    .subtitle{margin:.5px 0 0;color:#ccc;font-size:13.5px;font-weight:700}
-    .mainnav{display:flex;gap:26px;justify-self:center}
-    .navlink{color:#fff;text-decoration:none;font-weight:800;font-size:clamp(14px,1.8vw,20px);display:inline-flex;align-items:center;gap:8px;position:relative;padding:15px}
-    .navlink::after{content:"";position:absolute;left:0;right:0;bottom:-4px;height:2px;background:currentColor;opacity:.6;transform:scaleX(0);transition:.2s}
-    .navlink:hover::after{opacity:1;transform:scaleX(1)}
-    .actions{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:14px 18px;justify-self:end}
-    .cart{position:relative;color:#fff;display:inline-flex;align-items:center;justify-content:center;padding:10px;border-radius:12px;border:1px solid var(--ring);background:rgba(255,255,255,.1);font-size:22px}
-    .cart .badge{position:absolute;top:4px;right:4px;background:#e63946;color:#fff;font-size:12px;font-weight:700;border-radius:50%;padding:3px 6px;line-height:1}
-    .greeting{text-align:right}
-    .greeting .hello{font-size:clamp(18px,2.4vw,28px);font-weight:800}
-    .greeting .again{color:#ccc;font-weight:800;font-size:13px;margin-top:2px}
-    .search{grid-column:1/-1;display:flex;align-items:center;gap:10px;border:1px solid var(--ring);background:rgba(255,255,255,.05);border-radius:14px;padding:10px 12px;max-width:440px;justify-self:end}
-    .search input{border:0;outline:none;background:transparent;color:#fff;font-size:16px;flex:1}
-    .search input::placeholder{color:#aaa}
-    .brand-link{display:flex;align-items:center;gap:14px;text-decoration:none;color:inherit}
-
     /* BARRE FILTRI */
     .filter-bar{display:flex;justify-content:flex-start;align-items:center;gap:24px;margin:20px 0}
     .filter-form{display:flex;align-items:center;gap:10px}
@@ -96,49 +72,13 @@
     .price{color:var(--focus);font-weight:800;font-size:15px;margin-bottom:10px;align-items:center}
     .btn{margin-top:8px;padding:10px;border-radius:12px;border:1px solid var(--ring);background:#fff;color:#111;font-weight:800;text-align:center;text-decoration:none;transition:.15s;cursor:pointer;display:block}
     .btn:hover{background:linear-gradient(180deg,#1a1a1a,#0d0d0d);color:#fff}
-
-    /* FOOTER */
-    footer{position:fixed;bottom:0;left:0;width:100%;padding:16px;background:#111;border-top:1px solid rgba(255,255,255,.1);text-align:center;color:#999;font-size:14px}
-  </style>
+	 </style>
 </head>
 <body>
   <div class="page">
-    <!-- HEADER -->
-    <header class="topbar">
-      <div class="brand">
-        <a href="<%=ctx%>/home.jsp" class="brand-link">
-          <img src="<%=ctx%>/img/ball.png" alt="Logo SoccerWear" class="logo" />
-          <div class="brand-text">
-            <h1 class="title">SOCCERWEAR</h1>
-            <p class="subtitle">Vesti anche tu sport!</p>
-          </div>
-        </a>
-      </div>
-
-      <nav class="mainnav">
-        <a href="<%=ctx%>/catalogo.jsp" class="navlink"><i class="fa-solid fa-compass"></i>Esplora</a>
-        <a href="#" class="navlink"><i class="fa-solid fa-fire"></i>Novità</a>
-        <a href="#" class="navlink"><i class="fa-solid fa-circle-info"></i>Info</a>
-        <a href="<%=ctx%>/profile.jsp" class="navlink"><i class="fa-solid fa-user"></i>Profilo</a>
-        <a href="<%=ctx%>/logout" class="navlink"><i class="fa-solid fa-right-from-bracket"></i>Logout</a>
-      </nav>
-
-      <div class="actions">
-        <a href="#" class="cart" aria-label="Carrello">
-          <i class="fa-solid fa-cart-shopping"></i>
-          <span class="badge"><%= session.getAttribute("cartCount")!=null? session.getAttribute("cartCount") : 0 %></span>
-        </a>
-        <div class="greeting">
-          <div class="hello">Ciao, <span class="username"><%= (u!=null ? u.getNome() : "ospite") %></span>!</div>
-          <div class="again">Bello rivederti!</div>
-        </div>
-        <form class="search" role="search" action="#" method="get">
-          <span class="icon" aria-hidden="true"><i class="fa-solid fa-magnifying-glass"></i></span>
-          <input name="q" type="search" placeholder="Cerca" aria-label="Cerca prodotti" />
-        </form>
-      </div>
-    </header>
-
+  
+    <%@ include file="header.jspf" %>
+    
     <h1 style="text-align:center;margin-bottom:20px;color:#FFFFFF">Catalogo prodotti</h1>
 
     <!-- Barra filtri: ogni form conserva gli altri parametri -->
@@ -334,7 +274,8 @@
       }
     </script>
 
-    <footer>© 2025 SoccerWear — Catalogo</footer>
+    <%@ include file="footer.jspf" %>
+    
   </div>
 </body>
 </html>

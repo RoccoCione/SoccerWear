@@ -25,28 +25,6 @@
   overflow-x: hidden;
 }
 
-
-    /* HEADER (come home.jsp) */
-    .topbar{display:grid;grid-template-columns:minmax(240px,1fr) auto minmax(360px,1.2fr);align-items:center;gap:18px 28px;padding:18px 14px 8px;}
-    .brand{display:flex;align-items:center;gap:14px}
-    .logo{width:52px;height:52px}
-    .brand-text{display:flex;flex-direction:column}
-    .title{margin:0;font-size:clamp(22px,3.4vw,34px);font-weight:800}
-    .subtitle{margin:.5px 0 0;color:var(--muted);font-size:13.5px;font-weight:700}
-    .mainnav{display:flex;gap:26px;justify-self:center}
-    .navlink{color:#fff;text-decoration:none;font-weight:800;font-size:clamp(14px,1.8vw,20px);display:inline-flex;align-items:center;gap:8px;position:relative;padding:15px}
-    .navlink::after{content:"";position:absolute;left:0;right:0;bottom:-4px;height:2px;background:currentColor;opacity:.6;transform:scaleX(0);transition:.2s}
-    .navlink:hover::after{opacity:1;transform:scaleX(1)}
-    .actions{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:14px 18px;justify-self:end}
-    .cart{position:relative;color:#fff;display:inline-flex;align-items:center;justify-content:center;padding:10px;border-radius:12px;border:1px solid var(--ring);background:rgba(255,255,255,.03);font-size:22px}
-    .cart .badge{position:absolute;top:4px;right:4px;background:#e63946;color:#fff;font-size:12px;font-weight:700;border-radius:50%;padding:3px 6px;line-height:1}
-    .greeting{text-align:right}
-    .greeting .hello{font-size:clamp(18px,2.4vw,28px);font-weight:800}
-    .greeting .again{color:#dcdce3;font-weight:800;font-size:13px;margin-top:2px}
-    .search{grid-column:1/-1;display:flex;align-items:center;gap:10px;border:1px solid var(--ring);background:rgba(255,255,255,.05);border-radius:14px;padding:10px 12px;max-width:440px;justify-self:end}
-    .search input{border:0;outline:none;background:transparent;color:var(--ink);font-size:16px;flex:1}
-    .search input::placeholder{color:#c7c7ce} 
-
     /* HERO */
     .hero{ margin-top:26px; min-height:60vh; border-radius:18px;
       background: radial-gradient(90% 90% at 10% 10%, rgba(255,255,255,.03) 0%, transparent 60%),
@@ -225,55 +203,7 @@ footer .links a:hover {
 </head>
 <body>
   <div class="page">
-    <!-- HEADER -->
-    <header class="topbar">
-      <div class="brand">
-        <img src="img/ball.png" alt="" class="logo" />
-        <div class="brand-text">
-          <h1 class="title">SOCCERWEAR</h1>
-          <p class="subtitle">Vesti anche tu sport!</p>
-        </div>
-      </div>
-
-	<%
-    	model.UtenteBean utente = (model.UtenteBean) session.getAttribute("utente");
-    	boolean isAdmin = (utente != null && "admin".equalsIgnoreCase(utente.getRuolo()));
-	%>
-      <nav class="mainnav" aria-label="Principale">
-        <% if (isAdmin) { %>
-    	<a href="<%= request.getContextPath() %>/admincatalogo.jsp" class="navlink">
-      	<i class="fa-solid fa-cog"></i> Gestione Catalogo
-    	</a>
-  		<% } else { %>
-    	<a href="<%= request.getContextPath() %>/catalogo.jsp" class="navlink">
-      	<i class="fa-solid fa-compass"></i> Esplora
-    	</a>
-  		<% } %>
-        <a href="#" class="navlink"><i class="fa-solid fa-fire"></i>Novità</a>
-        <a href="#" class="navlink"><i class="fa-solid fa-circle-info"></i>Info</a>
-        <a href="profile.jsp" class="navlink"><i class="fa-solid fa-user"></i>Profilo</a>
-        <a href="${pageContext.request.contextPath}/logout" class="navlink"><i class="fa-solid fa-right-from-bracket"></i>Logout</a>
-      </nav>
-
-      <div class="actions">
-        <!-- ✅ Icona FA con badge -->
-        <a href="#" class="cart" aria-label="Carrello">
-          <i class="fa-solid fa-cart-shopping"></i>
-          <!-- esempio: sostituisci con la size del tuo carrello in sessione -->
-          <span class="badge">3</span>
-        </a>
-
-        <div class="greeting">
-          <div class="hello">Ciao, <span class="username"><%= ((model.UtenteBean)session.getAttribute("utente")).getNome() %></span>!</div>
-          <div class="again">Bello rivederti!</div>
-        </div>
-
-        <form class="search" role="search" action="#" method="get">
-          <span class="icon" aria-hidden="true"><i class="fa-solid fa-magnifying-glass"></i></span>
-          <input name="q" type="search" placeholder="Cerca" aria-label="Cerca prodotti" />
-        </form>
-      </div>
-    </header>
+    <%@ include file="header.jspf" %>
 
     <!-- SHOWCASE / SLIDER -->
 <section class="showcase" aria-label="Preview prodotti">
@@ -342,14 +272,7 @@ footer .links a:hover {
   </div>
 </section>
 
-<footer>
-  <div>© 2025 SoccerWear. Tutti i diritti riservati.</div>
-  <div class="links">
-    <a href="#">Privacy</a>
-    <a href="#">Termini</a>
-    <a href="#">Contatti</a>
-  </div>
-</footer>
+<%@ include file="footer.jspf" %>
   </div>
   <script>
   (function(){

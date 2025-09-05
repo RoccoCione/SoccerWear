@@ -1,4 +1,17 @@
-<%@ page contentType="text/html;charset=UTF-8" %>
+<style>
+footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 16px;
+  background: #111; /* stesso colore del body per continuità */
+  border-top: 1px solid rgba(255,255,255,.1);
+  text-align: center;
+  color: #999;
+  font-size: 14px;
+}
+</style>
 <footer>
   © 2025 SoccerWear — Tutti i diritti riservati
 </footer>
