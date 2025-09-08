@@ -269,5 +269,29 @@ public class ProdottoDAO {
         return lista;
     }
 
+    public Integer getStockById(int id) {
+        String sql = "SELECT unita_disponibili FROM prodotto WHERE id=?";
+        try (Connection con = ConnectionDatabase.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getInt(1);
+            }
+        } catch (SQLException e) { e.printStackTrace(); }
+        return null;
+    }
+
+    public boolean decrementStock(int id, int qty) {
+        String sql = "UPDATE prodotto SET unita_disponibili = unita_disponibili - ? WHERE id=? AND unita_disponibili >= ?";
+        try (Connection con = ConnectionDatabase.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, qty);
+            ps.setInt(2, id);
+            ps.setInt(3, qty);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) { e.printStackTrace(); }
+        return false;
+    }
+
 
 }

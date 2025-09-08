@@ -95,7 +95,7 @@
         <img src="<%=ctx%>/img/avatar.jpg" alt="Avatar" class="avatar">
         <div class="u-name"><%= u.getNome() %> <%= u.getCognome() %></div>
         <div class="u-username">@<%= u.getUsername() %></div>
-        <a class="slink" href="<%=ctx%>/ordini.jsp"><i class="fa-solid fa-receipt"></i> I miei ordini</a>
+        <a class="slink" href="<%=ctx%>/ordini"><i class="fa-solid fa-receipt"></i> I miei ordini</a>
         <a class="slink" href="<%=ctx%>/wishlist.jsp"><i class="fa-solid fa-heart"></i> Wishlist</a>
       </aside>
 

@@ -454,39 +454,5 @@
     <%@ include file="footer.jspf" %>
     
   </div>
-<!-- Dialogo conferma (riutilizzabile) -->
-<div id="confirmDialog" class="dialog-backdrop" role="dialog" aria-modal="true" aria-hidden="true">
-  <div class="dialog">
-    <div class="dialog-header">
-      <div class="icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
-      <strong>Confermi l’azione?</strong>
-    </div>
-    <div class="dialog-body">
-      <p id="confirmMessage">Sei sicuro?</p>
-    </div>
-    <div class="dialog-footer">
-      <button type="button" class="btn btn-ghost" id="confirmCancel">Annulla</button>
-      <button type="button" class="btn btn-danger" id="confirmOk">Conferma</button>
-    </div>
-  </div>
-</div>
-
-<!-- Dialogo info (per messaggi o piccoli alert) -->
-<div id="alertDialog" class="dialog-backdrop" role="dialog" aria-modal="true" aria-hidden="true">
-  <div class="dialog">
-    <div class="dialog-header">
-      <div class="icon" style="background:#eef6ff;border-color:#b6d7ff;color:#0b5ed7">
-        <i class="fa-solid fa-circle-info"></i>
-      </div>
-      <strong>Attenzione</strong>
-    </div>
-    <div class="dialog-body">
-      <p id="alertMessage">Messaggio…</p>
-    </div>
-    <div class="dialog-footer">
-      <button type="button" class="btn btn-primary" id="alertOk">Ok</button>
-    </div>
-  </div>
-</div>
 </body>
 </html>
