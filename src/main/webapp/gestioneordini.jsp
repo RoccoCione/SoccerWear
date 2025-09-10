@@ -6,8 +6,8 @@
   @SuppressWarnings("unchecked")
   List<OrdineAdminRow> ordini = (List<OrdineAdminRow>) request.getAttribute("ordini");
   String order = (String) request.getAttribute("order");
-  String statoFilter = (String) request.getAttribute("stato");
-  String payFilter = (String) request.getAttribute("pay");
+  String statoFilter = (String) request.getAttribute("stato"); // può essere null
+  String payFilter   = (String) request.getAttribute("pay");   // può essere null
   if (order == null) order = "dateDesc";
   SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
   Locale IT = Locale.ITALY;
@@ -48,6 +48,13 @@
 </style>
 </head>
 <body>
+<%
+  String flashOk = (String) session.getAttribute("flashOk");
+  String flashError = (String) session.getAttribute("flashError");
+  if (flashOk != null) session.removeAttribute("flashOk");
+  if (flashError != null) session.removeAttribute("flashError");
+%>
+
 <div class="page">
   <%@ include file="header.jspf" %>
 
@@ -65,7 +72,7 @@
 
       <label>Spedizione</label>
       <select name="stato" class="sel" onchange="this.form.submit()">
-        <option value="_ALL" <%= (statoFilter==null ? "selected": "") %>>Tutti</option>
+        <option value="" <%= (statoFilter == null || statoFilter.isEmpty()) ? "selected": "" %>>Tutti</option>
         <option value="IN_ELABORAZIONE" <%= "IN_ELABORAZIONE".equals(statoFilter)?"selected":"" %>>In elaborazione</option>
         <option value="IN_TRANSITO"     <%= "IN_TRANSITO".equals(statoFilter)?"selected":"" %>>In transito</option>
         <option value="CONSEGNATO"      <%= "CONSEGNATO".equals(statoFilter)?"selected":"" %>>Consegnato</option>
@@ -73,7 +80,7 @@
 
       <label>Pagamento</label>
       <select name="pay" class="sel" onchange="this.form.submit()">
-        <option value="_ALL" <%= (payFilter==null ? "selected": "") %>>Tutti i metodi</option>
+        <option value="" <%= (payFilter == null || payFilter.isEmpty()) ? "selected": "" %>>Tutti i metodi</option>
         <option value="CARTA"  <%= "CARTA".equalsIgnoreCase(String.valueOf(payFilter)) ? "selected": "" %>>Carta</option>
         <option value="PAYPAL" <%= "PAYPAL".equalsIgnoreCase(String.valueOf(payFilter)) ? "selected": "" %>>PayPal</option>
         <option value="COD"    <%= "COD".equalsIgnoreCase(String.valueOf(payFilter)) ? "selected": "" %>>Contrassegno</option>
@@ -126,6 +133,17 @@
           <a href="javascript:void(0)" class="btn" onclick="openOrderAdminDetails(<%= o.id %>)">
             <i class="fa-solid fa-eye"></i> Dettagli
           </a>
+
+          <form method="post" action="<%=ctx%>/admin/ordini/delete" style="margin-top:8px" onsubmit="return confirmDelete(<%= o.id %>)">
+            <input type="hidden" name="id" value="<%= o.id %>">
+            <label style="display:inline-flex;gap:6px;align-items:center;font-size:12px;color:#555">
+              <input type="checkbox" name="restock" value="1"> Ripristina stock
+            </label>
+            <button type="submit" class="btn" style="background:#fff0f0;border-color:#f3b0b0;color:#9d0000;margin-left:8px">
+              <i class="fa-solid fa-trash"></i> Elimina
+            </button>
+          </form>
+
         </div>
       </div>
     <% } } %>
@@ -134,7 +152,7 @@
   <%@ include file="footer.jspf" %>
 </div>
 
-<!-- MODALE DETTAGLIO (identico a prima) -->
+<!-- MODALE DETTAGLIO -->
 <div id="order-modal" class="modal-backdrop" aria-hidden="true">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="order-title">
     <header>
@@ -271,6 +289,11 @@
       errBox.textContent = 'Impossibile caricare il dettaglio. ' + err.message;
       errBox.style.display='block';
     }
+  };
+
+  // conferma delete
+  window.confirmDelete = function(id){
+    return confirm('Eliminare definitivamente l\'ordine #' + id + '?\nQuesta azione non è reversibile.');
   };
 })();
 </script>

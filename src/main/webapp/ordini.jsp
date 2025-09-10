@@ -1,29 +1,23 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="java.util.*, java.math.BigDecimal, java.text.SimpleDateFormat" %>
 <%@ page import="model.OrdineBean" %>
-
 <%
-  // Se aperta senza controller, reindirizza
   if (request.getAttribute("ordini") == null) {
     response.sendRedirect(request.getContextPath() + "/ordini");
     return;
   }
-
   @SuppressWarnings("unchecked")
   List<OrdineBean> ordini = (List<OrdineBean>) request.getAttribute("ordini");
   String order = (String) request.getAttribute("order");
   if (order == null) order = "dateDesc";
-
   SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
   Locale IT = Locale.ITALY;
 %>
-
 <!doctype html>
 <html lang="it">
 <head>
   <meta charset="utf-8">
   <title>I miei ordini • SoccerWear</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.2/css/all.min.css" />
   <style>
     :root { --bg:#111; --panel:#fff; --ring:#ddd; --ink:#111; --muted:#555; --focus:#003366; --radius:16px; }
@@ -63,62 +57,77 @@
     .pill{display:inline-block;padding:4px 8px;border-radius:999px;border:1px solid #ddd;background:#f5f7ff;color:#00366}
     .muted-d{color:#666}
     .right{float:right}
+    .btn-danger{background:#fff0f0;border:1px solid #ffb3b3;color:#a10000}
+    .btn-danger:hover{background:#ffe5e5}
   </style>
 </head>
 <body>
-  <div class="page">
-    <%@ include file="header.jspf" %>
+<div class="page">
+  <%@ include file="header.jspf" %>
 
-    <h1><i class="fa-solid fa-receipt"></i> I miei ordini</h1>
+  <h1><i class="fa-solid fa-receipt"></i> I miei ordini</h1>
 
-    <!-- Filtro Ordina per -->
-    <div class="filter-bar">
-      <form method="get" action="<%=ctx%>/ordini" class="filter-form">
-        <label for="order">Ordina per:</label>
-        <select name="order" id="order" onchange="this.form.submit()">
-          <option value="dateDesc"  <%= "dateDesc".equals(order)  ? "selected" : "" %>>Data: dal più recente</option>
-          <option value="dateAsc"   <%= "dateAsc".equals(order)   ? "selected" : "" %>>Data: dal meno recente</option>
-          <option value="priceDesc" <%= "priceDesc".equals(order) ? "selected" : "" %>>Prezzo: dal più alto</option>
-          <option value="priceAsc"  <%= "priceAsc".equals(order)  ? "selected" : "" %>>Prezzo: dal più basso</option>
-        </select>
-      </form>
-    </div>
-
-    <!-- Elenco ordini in card (stile catalogo) -->
-    <main class="grid">
-      <% if (ordini == null || ordini.isEmpty()) { %>
-        <div class="card"><div class="card-body"><div>Nessun ordine trovato.</div></div></div>
-      <% } else {
-           for (OrdineBean o : ordini) {
-             BigDecimal lordo = (o.getTotaleSpesa()==null?BigDecimal.ZERO:o.getTotaleSpesa())
-                               .add(o.getTotaleIva()==null?BigDecimal.ZERO:o.getTotaleIva());
-      %>
-        <div class="card">
-          <div class="card-body">
-            <div class="row">
-              <div><strong>Ordine #<%= o.getId() %></strong></div>
-              <div class="badge"><%= o.getStato() %></div>
-            </div>
-            <div class="row">
-              <div class="muted">Data</div>
-              <div><%= o.getDataOrdine()!=null ? sdf.format(o.getDataOrdine()) : "" %></div>
-            </div>
-            <div class="row">
-              <div class="muted">Totale</div>
-              <div><%= String.format(IT,"%.2f €", lordo) %></div>
-            </div>
-            <a href="javascript:void(0)" class="btn" onclick="openOrderDetails(<%= o.getId() %>)">
-              <i class="fa-solid fa-eye"></i> Dettagli
-            </a>
-          </div>
-        </div>
-      <% } } %>
-    </main>
-
-    <%@ include file="footer.jspf" %>
+  <div class="filter-bar">
+    <form method="get" action="<%=ctx%>/ordini" class="filter-form">
+      <label for="order">Ordina per:</label>
+      <select name="order" id="order" onchange="this.form.submit()">
+        <option value="dateDesc"  <%= "dateDesc".equals(order)  ? "selected" : "" %>>Data: dal più recente</option>
+        <option value="dateAsc"   <%= "dateAsc".equals(order)   ? "selected" : "" %>>Data: dal meno recente</option>
+        <option value="priceDesc" <%= "priceDesc".equals(order) ? "selected" : "" %>>Prezzo: dal più alto</option>
+        <option value="priceAsc"  <%= "priceAsc".equals(order)  ? "selected" : "" %>>Prezzo: dal più basso</option>
+      </select>
+    </form>
   </div>
 
-  <!-- MODALE DETTAGLIO ORDINE -->
+  <main class="grid">
+  <% if (ordini == null || ordini.isEmpty()) { %>
+    <div class="card"><div class="card-body"><div>Nessun ordine trovato.</div></div></div>
+  <% } else {
+       for (OrdineBean o : ordini) {
+         BigDecimal lordo = (o.getTotaleSpesa()==null?BigDecimal.ZERO:o.getTotaleSpesa())
+                           .add(o.getTotaleIva()==null?BigDecimal.ZERO:o.getTotaleIva());
+         String ship = (String) request.getAttribute("spedizione_stato_" + o.getId());
+         String st = o.getStato()==null? "" : o.getStato();
+
+         // SOLO se spedizione è IN_COSTRUZIONE
+         boolean cancellabile = "IN_COSTRUZIONE".equalsIgnoreCase(ship);
+  %>
+    <div class="card">
+      <div class="card-body">
+        <div class="row">
+          <div><strong>Ordine #<%= o.getId() %></strong></div>
+          <div class="badge"><%= st %></div>
+        </div>
+        <div class="row">
+          <div class="muted">Spedizione</div>
+          <div><%= ship == null ? "-" : ship.replace('_',' ') %></div>
+        </div>
+        <div class="row">
+          <div class="muted">Data</div>
+          <div><%= o.getDataOrdine()!=null ? sdf.format(o.getDataOrdine()) : "" %></div>
+        </div>
+        <div class="row">
+          <div class="muted">Totale</div>
+          <div><%= String.format(IT,"%.2f €", lordo) %></div>
+        </div>
+
+        <a href="javascript:void(0)" class="btn" onclick="openOrderDetails(<%= o.getId() %>)">
+          <i class="fa-solid fa-eye"></i> Dettagli
+        </a>
+
+        <% if (cancellabile) { %>
+          <a href="javascript:void(0)" class="btn btn-danger" onclick="cancelOrder(<%= o.getId() %>)">
+            <i class="fa-solid fa-ban"></i> Annulla ordine
+          </a>
+        <% } %>
+      </div>
+    </div>
+  <% } } %>
+</main>
+  <%@ include file="footer.jspf" %>
+</div>
+
+<!-- MODALE DETTAGLIO ORDINE -->
   <div id="order-modal" class="modal-backdrop" aria-hidden="true">
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="order-title">
       <header>
@@ -155,7 +164,6 @@
       </div>
     </div>
   </div>
-
 <script>
 (function(){
   var ctx = '<%= ctx %>';
@@ -251,6 +259,26 @@
     }
   };
 })();
+</script>
+<script>
+async function cancelOrder(id){
+  if(!confirm('Confermi l\'annullamento di questo ordine?')) return;
+  try{
+    const res = await fetch('<%=ctx%>/ordine/cancel', {
+      method: 'POST',
+      headers: { 'Content-Type':'application/x-www-form-urlencoded' },
+      body: 'id=' + encodeURIComponent(id)
+    });
+    const js = await res.json().catch(()=>({success:false,error:'Risposta non valida'}));
+    if(!res.ok || !js.success){
+      alert(js.error || 'Impossibile annullare l\'ordine.');
+      return;
+    }
+    location.reload();
+  }catch(e){
+    alert('Errore di rete: ' + e.message);
+  }
+}
 </script>
 </body>
 </html>

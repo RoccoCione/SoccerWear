@@ -24,11 +24,11 @@
     .card{background:linear-gradient(180deg,#15151d,#0d0d13);border:1px solid var(--ring);border-radius:var(--radius);padding:20px}
     .side{display:grid;gap:16px;align-content:start}
     .avatar{width:140px;height:140px;border-radius:16px;object-fit:cover;border:1px solid var(--ring)}
-    .u-name{font-size:22px;font-weight:800}
-    .u-username{color:var(--muted);font-weight:700}
+    .u-name{font-size:22px;font-weight:800;color:#FFF}
+    .u-username{color:var(--muted);font-weight:700;color:#FFF}
     .slink{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;border:1px solid var(--ring);padding:10px 12px;border-radius:12px;background:#16161f}
     .slink:hover{filter:brightness(1.06)}
-    .panel h2{margin:0 0 12px;font-size:18px}
+    .panel h2{margin:0 0 12px;font-size:18px;color:#FFF}
     .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
     .row{display:grid}
     label{font-size:13px;color:var(--muted);margin:4px 0 6px}

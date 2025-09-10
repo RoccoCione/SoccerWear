@@ -3,103 +3,213 @@
     model.UtenteBean u = (model.UtenteBean) session.getAttribute("utente");
     String ctx = request.getContextPath();
 %>
+
 <style>
-/* HEADER (come home.jsp) */
-    .topbar{display:grid;grid-template-columns:minmax(240px,1fr) auto minmax(360px,1.2fr);align-items:center;gap:18px 28px;padding:18px 14px 8px;}
-    .brand{display:flex;align-items:center;gap:14px}
-    .logo{width:52px;height:52px}
-    .brand-text{display:flex;flex-direction:column}
-    .title{margin:0;font-size:clamp(22px,3.4vw,34px);font-weight:800;color:#FFFFFF}
-    .subtitle{margin:.5px 0 0;color:var(--muted);font-size:13.5px;font-weight:700;color:#dcdce3}
-    .mainnav{display:flex;gap:26px;justify-self:center}
-    .navlink{color:#fff;text-decoration:none;font-weight:800;font-size:clamp(14px,1.8vw,20px);display:inline-flex;align-items:center;gap:8px;position:relative;padding:15px}
-    .navlink::after{content:"";position:absolute;left:0;right:0;bottom:-4px;height:2px;background:currentColor;opacity:.6;transform:scaleX(0);transition:.2s}
-    .navlink:hover::after{opacity:1;transform:scaleX(1)}
-    .actions{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:14px 18px;justify-self:end}
-    .cart{position:relative;color:#fff;display:inline-flex;align-items:center;justify-content:center;padding:10px;border-radius:12px;border:1px solid var(--ring);background:rgba(255,255,255,.03);font-size:22px}
-    .cart .badge{position:absolute;top:4px;right:4px;background:#e63946;color:#fff;font-size:12px;font-weight:700;border-radius:50%;padding:3px 6px;line-height:1}
-    .greeting{text-align:right}
-    .greeting .hello{font-size:clamp(18px,2.4vw,28px);font-weight:800;color:#FFFFFF}
-    .greeting .again{color:#dcdce3;font-weight:800;font-size:13px;margin-top:2px}
-    .search{grid-column:1/-1;display:flex;align-items:center;gap:10px;border:1px solid var(--ring);background:rgba(255,255,255,.05);border-radius:14px;padding:10px 12px;max-width:440px;justify-self:end}
-    .search input{border:0;outline:none;background:transparent;color:var(--ink);font-size:16px;flex:1}
-    .search input::placeholder{color:#c7c7ce}
-    .brand-link {
-  	display: flex;
-  	align-items: center;
-  	gap: 14px;
-  	text-decoration: none;
-  	color: inherit; /* mantiene il colore del testo */
-	}
+  :root{
+    --ring:#2c2c39; --muted:#888; --ink:#111; --radius:16px;
+    --break-lg: 992px; --break-md: 768px;
+  }
+  /* ====== BASE ====== */
+  .topbar{
+    display:grid;
+    grid-template-columns:minmax(220px,1fr) auto minmax(360px,1.2fr);
+    align-items:center;gap:18px 28px;padding:18px 14px 8px;
+  }
+  .brand{display:flex;align-items:center;gap:14px}
+  .logo{width:52px;height:52px}
+  .brand-text{display:flex;flex-direction:column}
+  .title{margin:0;font-size:clamp(22px,3.4vw,34px);font-weight:800;color:#fff}
+  .subtitle{margin:.5px 0 0;color:#dcdce3;font-size:13.5px;font-weight:700}
+  .brand-link{display:flex;align-items:center;gap:14px;text-decoration:none;color:inherit}
+
+  .mainnav{display:flex;gap:26px;justify-self:center}
+  .navlink{
+    color:#fff;text-decoration:none;font-weight:800;
+    font-size:clamp(14px,1.8vw,20px);display:inline-flex;align-items:center;gap:8px;
+    position:relative;padding:12px 6px;
+  }
+  .navlink::after{content:"";position:absolute;left:0;right:0;bottom:-4px;height:2px;background:currentColor;opacity:.6;transform:scaleX(0);transition:.2s}
+  .navlink:hover::after{opacity:1;transform:scaleX(1)}
+
+  .actions{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:14px 18px;justify-self:end}
+  .cart{position:relative;color:#fff;display:inline-flex;align-items:center;justify-content:center;padding:10px;border-radius:12px;border:1px solid var(--ring);background:rgba(255,255,255,.03);font-size:22px}
+  .cart .badge{position:absolute;top:4px;right:4px;background:#e63946;color:#fff;font-size:12px;font-weight:700;border-radius:50%;padding:3px 6px;line-height:1}
+  .greeting{text-align:right}
+  .greeting .hello{font-size:clamp(18px,2.4vw,28px);font-weight:800;color:#fff}
+  .greeting .again{color:#dcdce3;font-weight:800;font-size:13px;margin-top:2px}
+  .search{grid-column:1/-1;display:flex;align-items:center;gap:10px;border:1px solid var(--ring);background:rgba(255,255,255,.05);border-radius:14px;padding:10px 12px;max-width:440px;justify-self:end}
+  .search input{border:0;outline:none;background:transparent;color:#fff;font-size:16px;flex:1}
+  .search input::placeholder{color:#c7c7ce}
+
+  /* ====== HAMBURGER ====== */
+  .menu-toggle{
+    display:none; /* visibile solo su mobile */
+    justify-self:start;
+    border:1px solid var(--ring);
+    background:rgba(255,255,255,.06);
+    color:#fff;border-radius:12px;padding:10px 12px;
+    font-weight:800;cursor:pointer;gap:10px;align-items:center;
+  }
+  .menu-toggle i{font-size:18px}
+
+  /* ====== OFF-CANVAS NAV (mobile) ====== */
+  .nav-backdrop{
+    position:fixed;inset:0;background:rgba(0,0,0,.45);
+    display:none;z-index:998;
+  }
+  .nav-backdrop.open{display:block}
+
+  @media (max-width: 1200px){
+    .topbar{grid-template-columns:auto 1fr auto}
+  }
+
+  @media (max-width: 992px){
+    .topbar{
+      grid-template-columns:auto 1fr auto;
+      row-gap:12px;
+    }
+    .menu-toggle{display:inline-flex}
+    /* nav diventa pannello laterale */
+    .mainnav{
+      position:fixed;top:0;left:0;height:100vh;width:min(86%,360px);
+      background:#0f0f13;border-right:1px solid #1c1c25;
+      padding:18px 16px;flex-direction:column;gap:6px;
+      transform:translateX(-100%);transition:transform .25s ease;
+      z-index:999; /* davanti al resto */
+    }
+    .mainnav.open{transform:translateX(0)}
+    .navlink{padding:14px 10px;font-size:18px}
+    .navlink::after{display:none}
+
+    /* azioni e search su due righe */
+    .actions{
+      grid-template-columns:auto auto; justify-self:end; gap:10px 12px;
+    }
+    .greeting{display:none} /* compatto su mobile; puoi rimetterlo se vuoi */
+    .search{grid-column:1/-1;justify-self:stretch;max-width:100%}
+  }
+
+  @media (max-width: 600px){
+    .logo{width:44px;height:44px}
+    .title{font-size:clamp(18px,6vw,26px)}
+  }
 </style>
-<!-- HEADER -->
-    <header class="topbar">
-      <div class="brand">
-  		<a href="<%= request.getContextPath() %>/home.jsp" class="brand-link">
-    	<img src="<%= request.getContextPath() %>/img/ball.png" alt="Logo SoccerWear" class="logo" />
-    	<div class="brand-text">
-      	<h1 class="title">SOCCERWEAR</h1>
-      	<p class="subtitle">Vesti anche tu sport!</p>
-    	</div>
-  		</a>
-	</div>
-		<%
-    	model.UtenteBean utente = (model.UtenteBean) session.getAttribute("utente");
-    	boolean isAdmin = (utente != null && "admin".equalsIgnoreCase(utente.getRuolo()));
-		%>
-	
-      <nav class="mainnav">
-        <% if (isAdmin) { %>
-    	<a href="<%= request.getContextPath() %>/admincatalogo.jsp" class="navlink">
-      	<i class="fa-solid fa-cog"></i> Gestione Catalogo
-    	</a>
-  		<% } else { %>
-    	<a href="<%= request.getContextPath() %>/catalogo.jsp" class="navlink">
-      	<i class="fa-solid fa-compass"></i> Esplora
-    	</a>
-  		<% } %>
-        <% if (isAdmin) { %>
-    	<a href="<%= request.getContextPath() %>/gestioneordini.jsp" class="navlink">
-      	<i class="fa-solid fa-truck"></i>Gestione Ordini</i> 
-    	</a>
-  		<% } else { %>
-    	<a href="<%= request.getContextPath() %>/novita.jsp" class="navlink">
-      	<i class="fa-solid fa-award"></i> Ultimi Arrivi</i>
-    	</a>
-  		<% } %>
-        <a href="#" class="navlink"><i class="fa-solid fa-circle-info"></i>Info</a>
-         <% if (u != null) { %>
-    	<a href="<%= request.getContextPath() %>/profile.jsp" class="navlink"><i class="fa-solid fa-user"></i>Profilo</a>
-  		<% } else { %>
-    	<a href="errore.jsp" class="navlink"><i class="fa-solid fa-user"></i>Profilo</a>
-  		<% } %>
-        <% if (u != null) { %>
-    	<a href="<%=ctx%>/logout" class="navlink"><i class="fa-solid fa-person-walking-luggage"></i>Logout</a>
-  		<% } else { %>
-    	<a href="<%=ctx%>/logout" class="navlink"><i class="fa-solid fa-user-secret"></i>Login</a>
-  		<% } %>
-      </nav>
-      <div class="actions">
-      	<% if (!isAdmin) { %>
-       <a href="<%=ctx%>/carrello.jsp" class="cart" aria-label="Carrello">
-  		<i class="fa-solid fa-cart-shopping"></i>
-  		<%
-    	model.Cart _cart = (model.Cart) session.getAttribute("cart");
-    	int _count = (_cart != null) ? _cart.getItemCount() : 0;
-  		%>
-  		<span class="badge"><%= _count %></span>
-		</a>
-       	<% } %>
-        <div class="greeting">
-          <div class="hello">
-          <i class="fa-solid fa-child-reaching"></i>
-  				Ciao, <%= (u != null ? u.getNome() : "ospite ") %>!
-		  </div>
-          <div class="again">Bello rivederti!</div>
-        </div>
-        <form class="search" role="search" action="#" method="get">
-          <span class="icon" aria-hidden="true"><i class="fa-solid fa-magnifying-glass"></i></span>
-          <input name="q" type="search" placeholder="Cerca" aria-label="Cerca prodotti" />
-        </form>
+
+<header class="topbar" role="banner">
+  <!-- Hamburger -->
+  <button class="menu-toggle" id="menuToggle" aria-controls="mainnav" aria-expanded="false">
+    <i class="fa-solid fa-bars"></i> Menu
+  </button>
+
+  <!-- Brand -->
+  <div class="brand">
+    <a href="<%= request.getContextPath() %>/home.jsp" class="brand-link">
+      <img src="<%= request.getContextPath() %>/img/ball.png" alt="Logo SoccerWear" class="logo" />
+      <div class="brand-text">
+        <h1 class="title">SOCCERWEAR</h1>
+        <p class="subtitle">Vesti anche tu sport!</p>
       </div>
-    </header>
+    </a>
+  </div>
+
+  <%
+    model.UtenteBean utente = (model.UtenteBean) session.getAttribute("utente");
+    boolean isAdmin = (utente != null && "admin".equalsIgnoreCase(utente.getRuolo()));
+  %>
+
+  <!-- NAV -->
+  <nav class="mainnav" id="mainnav" aria-label="Navigazione principale">
+    <% if (isAdmin) { %>
+      <a href="<%= request.getContextPath() %>/admincatalogo.jsp" class="navlink"><i class="fa-solid fa-cog"></i> Gestione Catalogo</a>
+    <% } else { %>
+      <a href="<%= request.getContextPath() %>/catalogo.jsp" class="navlink"><i class="fa-solid fa-compass"></i> Esplora</a>
+    <% } %>
+
+    <% if (isAdmin) { %>
+      <a href="<%= request.getContextPath() %>/gestioneordini.jsp" class="navlink">
+        <i class="fa-solid fa-truck"></i> Gestione Ordini
+      </a>
+    <% } else { %>
+      <a href="<%= request.getContextPath() %>/novita.jsp" class="navlink">
+        <i class="fa-solid fa-award"></i> Ultimi Arrivi
+      </a>
+    <% } %>
+
+    <a href="#" class="navlink"><i class="fa-solid fa-circle-info"></i> Info</a>
+
+    <% if (u != null) { %>
+      <a href="<%= request.getContextPath() %>/profile.jsp" class="navlink"><i class="fa-solid fa-user"></i> Profilo</a>
+    <% } else { %>
+      <a href="errore.jsp" class="navlink"><i class="fa-solid fa-user"></i> Profilo</a>
+    <% } %>
+
+    <% if (u != null) { %>
+      <a href="<%=ctx%>/logout" class="navlink"><i class="fa-solid fa-person-walking-luggage"></i> Logout</a>
+    <% } else { %>
+      <a href="<%=ctx%>/logout" class="navlink"><i class="fa-solid fa-user-secret"></i> Login</a>
+    <% } %>
+  </nav>
+
+  <!-- Azioni -->
+  <div class="actions">
+    <% if (!isAdmin) { %>
+    <a href="<%=ctx%>/carrello.jsp" class="cart" aria-label="Carrello">
+      <i class="fa-solid fa-cart-shopping"></i>
+      <%
+        model.Cart _cart = (model.Cart) session.getAttribute("cart");
+        int _count = (_cart != null) ? _cart.getItemCount() : 0;
+      %>
+      <span class="badge"><%= _count %></span>
+    </a>
+    <% } %>
+
+    <div class="greeting">
+      <div class="hello"><i class="fa-solid fa-child-reaching"></i> Ciao, <%= (u != null ? u.getNome() : "ospite ") %>!</div>
+      <div class="again">Bello rivederti!</div>
+    </div>
+
+    <form class="search" role="search" action="#" method="get">
+      <span class="icon" aria-hidden="true"><i class="fa-solid fa-magnifying-glass"></i></span>
+      <input name="q" type="search" placeholder="Cerca" aria-label="Cerca prodotti" />
+    </form>
+  </div>
+
+  <!-- Backdrop per il menu mobile -->
+  <div class="nav-backdrop" id="navBackdrop" hidden></div>
+</header>
+
+<script>
+(function(){
+  const btn = document.getElementById('menuToggle');
+  const nav = document.getElementById('mainnav');
+  const backdrop = document.getElementById('navBackdrop');
+
+  function openNav(){
+    nav.classList.add('open');
+    backdrop.classList.add('open');
+    backdrop.hidden = false;
+    btn.setAttribute('aria-expanded','true');
+    // focus al primo link per accessibilità
+    const firstLink = nav.querySelector('a');
+    if (firstLink) firstLink.focus();
+    // blocco scroll body (opzionale)
+    document.documentElement.style.overflow = 'hidden';
+  }
+  function closeNav(){
+    nav.classList.remove('open');
+    backdrop.classList.remove('open');
+    backdrop.hidden = true;
+    btn.setAttribute('aria-expanded','false');
+    document.documentElement.style.overflow = '';
+    btn.focus();
+  }
+  btn.addEventListener('click', function(){
+    if (nav.classList.contains('open')) closeNav(); else openNav();
+  });
+  backdrop.addEventListener('click', closeNav);
+  // chiudi con ESC
+  window.addEventListener('keydown', function(e){
+    if (e.key === 'Escape' && nav.classList.contains('open')) closeNav();
+  });
+})();
+</script>

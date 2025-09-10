@@ -28,7 +28,7 @@ public class CheckoutController extends HttpServlet {
     }
 
     private Cart getCart(HttpServletRequest req) {
-        HttpSession s = req.getSession(false); // NON creare nuova sessione
+        HttpSession s = req.getSession(false);
         return s == null ? null : (Cart) s.getAttribute("cart");
     }
 
@@ -75,48 +75,41 @@ public class CheckoutController extends HttpServlet {
             return;
         }
 
-        // --- Spedizione ---
-        String indirizzo   = n(req.getParameter("indirizzo"));
-        String cap         = n(req.getParameter("cap"));
-        String numeroCivico= n(req.getParameter("numero_civico"));
-        String citta       = n(req.getParameter("citta"));
+        // Spedizione
+        String indirizzo = n(req.getParameter("indirizzo"));
+        String cap = n(req.getParameter("cap"));
+        String numeroCivico = n(req.getParameter("numero_civico"));
+        String citta = n(req.getParameter("citta"));
         if (indirizzo == null || cap == null || numeroCivico == null || citta == null) {
             session.setAttribute("flashError", "Compila tutti i campi di spedizione.");
             resp.sendRedirect(req.getContextPath() + "/checkout");
             return;
         }
 
-        // --- Metodo pagamento ---
-        // Accetto sia "metodo_pagamento" sia "payment_method" (dal form attuale)
-        String metodo = n(req.getParameter("metodo_pagamento"));
-        if (metodo == null) metodo = n(req.getParameter("payment_method"));
-
-        // Il form invia "TEST" per la carta: lo normalizzo a "CARTA"
-        if ("TEST".equalsIgnoreCase(metodo)) metodo = "CARTA";
-
-        if (metodo == null ||
-            !(metodo.equalsIgnoreCase("CARTA") || metodo.equalsIgnoreCase("PAYPAL") || metodo.equalsIgnoreCase("COD"))) {
+        // Metodo pagamento (accetta "payment_method" o "metodo_pagamento")
+        String metodo = n(req.getParameter("payment_method"));
+        if (metodo == null) metodo = n(req.getParameter("metodo_pagamento"));
+        if (metodo == null || !(metodo.equalsIgnoreCase("CARTA") || metodo.equalsIgnoreCase("PAYPAL") || metodo.equalsIgnoreCase("COD"))) {
             session.setAttribute("flashError", "Seleziona un metodo di pagamento valido.");
             resp.sendRedirect(req.getContextPath() + "/checkout");
             return;
         }
 
-        // Se CARTA, leggo i dati dal modale (numero mascherato lato server: salvo solo le ultime 4)
-        String cardNumber  = n(req.getParameter("card_number"));
-        String cardCircuit = n(req.getParameter("card_circuit")); // VISA/MASTERCARD/AMEX (facoltativo)
+        // Se CARTA, valida i campi della carta (dal modale)
+        String cardNumber = n(req.getParameter("card_number"));
+        String cardCircuit = n(req.getParameter("card_circuit"));
         if ("CARTA".equalsIgnoreCase(metodo)) {
-            if (cardNumber == null || cardNumber.replaceAll("\\D+", "").length() < 12) {
+            if (cardNumber == null || cardNumber.length() < 12) {
                 session.setAttribute("flashError", "Numero carta non valido.");
                 resp.sendRedirect(req.getContextPath() + "/checkout");
                 return;
             }
         }
 
-        // Etichetta leggibile da salvare su ordine.metodo_pagamento (max 100 char consigliati in DB)
+        // Etichetta leggibile da salvare in ordine.metodo_pagamento
         String metodoDisplay;
         if ("CARTA".equalsIgnoreCase(metodo)) {
-            String digits = cardNumber == null ? "" : cardNumber.replaceAll("\\D+", "");
-            String last4  = digits.length() >= 4 ? digits.substring(digits.length() - 4) : "****";
+            String last4 = (cardNumber != null && cardNumber.length() >= 4) ? cardNumber.substring(cardNumber.length() - 4) : "****";
             metodoDisplay = (cardCircuit != null && !cardCircuit.isBlank())
                     ? "Carta " + cardCircuit + " (**** " + last4 + ")"
                     : "Carta (**** " + last4 + ")";
@@ -125,10 +118,8 @@ public class CheckoutController extends HttpServlet {
         } else {
             metodoDisplay = "Pagamento alla consegna";
         }
-        // Se in DB la colonna è limitata (es. VARCHAR(100)), taglio in sicurezza:
-        metodoDisplay = safeTruncate(metodoDisplay, 100);
 
-        // --- Totali ---
+        // Totali
         BigDecimal totNetto = bd(cart.getSubtotaleNetto());
         BigDecimal totIva   = bd(cart.getTotaleIva());
         BigDecimal totLordo = bd(cart.getTotaleLordo());
@@ -149,19 +140,19 @@ public class CheckoutController extends HttpServlet {
             int spedId = spedizioneDAO.insert(con, sp);
             if (spedId <= 0) throw new SQLException("Impossibile creare la spedizione.");
 
-            // 2) ORDINE (CREATO) + metodo_pagamento leggibile
+            // 2) ORDINE (salva spedizione_stato separato)
             Integer ordineId = null;
             try (PreparedStatement ps = con.prepareStatement(
-                "INSERT INTO ordine (utente_id, spedizione_id, totale_spesa, totale_iva, stato, metodo_pagamento) " +
-                "VALUES (?,?,?,?, ?, ?)",
+                "INSERT INTO ordine (utente_id, spedizione_id, totale_spesa, totale_iva, stato, metodo_pagamento, spedizione_stato) " +
+                "VALUES (?,?,?,?, ?, ?, ?)",
                 Statement.RETURN_GENERATED_KEYS)) {
-
                 ps.setInt(1, u.getId());
                 ps.setInt(2, spedId);
                 ps.setBigDecimal(3, totNetto);
                 ps.setBigDecimal(4, totIva);
                 ps.setString(5, "CREATO");
                 ps.setString(6, metodoDisplay);
+                ps.setString(7, "IN_COSTRUZIONE"); // <— nuovo default
                 ps.executeUpdate();
                 try (ResultSet rs = ps.getGeneratedKeys()) {
                     if (rs.next()) ordineId = rs.getInt(1);
@@ -169,7 +160,7 @@ public class CheckoutController extends HttpServlet {
             }
             if (ordineId == null) throw new SQLException("Impossibile creare l'ordine.");
 
-            // 3) RIGHE + PERSONALIZZAZIONI + SCALA STOCK (verifica stock riga-per-riga)
+            // 3) RIGHE + PERSONALIZZAZIONI + SCALA STOCK
             try (PreparedStatement psRiga = con.prepareStatement(
                      "INSERT INTO riga_ordine (ordine_id, prodotto_id, nome_prodotto, taglia, prezzo_unitario, iva, quantita, totale_riga) " +
                      "VALUES (?,?,?,?,?,?,?,?)",
@@ -188,11 +179,11 @@ public class CheckoutController extends HttpServlet {
                         throw new SQLException("Stock insufficiente per " + it.getNome() + " (" + it.getTaglia() + ")");
                     }
 
-                    BigDecimal prezzo     = bd(it.getPrezzo());
-                    BigDecimal ivaPerc    = bd(it.getIva()); // es. 22.00
-                    BigDecimal qta        = new BigDecimal(it.getQuantita());
+                    BigDecimal prezzo = bd(it.getPrezzo());
+                    BigDecimal ivaPerc = bd(it.getIva());
+                    BigDecimal qta = new BigDecimal(it.getQuantita());
                     BigDecimal lineaNetta = prezzo.multiply(qta);
-                    BigDecimal lineaIva   = lineaNetta.multiply(ivaPerc).divide(new BigDecimal("100"));
+                    BigDecimal lineaIva = lineaNetta.multiply(ivaPerc).divide(new BigDecimal("100"));
                     BigDecimal totaleRiga = lineaNetta.add(lineaIva);
 
                     psRiga.setInt(1, ordineId);
@@ -233,7 +224,7 @@ public class CheckoutController extends HttpServlet {
             try (PreparedStatement ps = con.prepareStatement(
                     "INSERT INTO pagamento (ordine_id, metodo_id, importo, esito) VALUES (?,?,?, ?)")) {
                 ps.setInt(1, ordineId);
-                ps.setNull(2, Types.INTEGER); // se in futuro colleghi a tabella metodo_pagamento
+                ps.setNull(2, Types.INTEGER);
                 ps.setBigDecimal(3, totLordo);
                 ps.setString(4, "OK");
                 ps.executeUpdate();
@@ -258,7 +249,6 @@ public class CheckoutController extends HttpServlet {
 
             con.commit();
 
-            // svuota carrello + badge
             cart.clear();
             session.setAttribute("cartCount", 0);
 
@@ -274,7 +264,6 @@ public class CheckoutController extends HttpServlet {
         }
     }
 
-    // -------- Helpers --------
     private static BigDecimal bd(double d) {
         return new BigDecimal(String.format(java.util.Locale.ENGLISH, "%.2f", d));
     }
@@ -282,9 +271,5 @@ public class CheckoutController extends HttpServlet {
         if (s == null) return null;
         s = s.trim();
         return s.isEmpty() ? null : s;
-    }
-    private static String safeTruncate(String s, int max) {
-        if (s == null) return null;
-        return s.length() <= max ? s : s.substring(0, max);
     }
 }

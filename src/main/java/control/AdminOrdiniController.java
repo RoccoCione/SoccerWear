@@ -13,9 +13,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 @WebServlet(urlPatterns = {
-        "/admin/ordini",                // GET: lista + filtri (JSP)
-        "/admin/ordine",                // GET: dettaglio JSON per modale
-        "/admin/ordini/spedizione"      // POST: update spedizione_stato
+        "/admin/ordini",           // GET: lista + filtri (JSP)
+        "/admin/ordine",           // GET: dettaglio JSON per modale
+        "/admin/ordini/spedizione" // POST: update spedizione_stato
 })
 public class AdminOrdiniController extends HttpServlet {
 
@@ -23,10 +23,10 @@ public class AdminOrdiniController extends HttpServlet {
     public static class OrdineAdminRow {
         public int id;
         public Timestamp dataOrdine;
-        public String stato;                // stato pagamento/ordine (CREATO/PAGATO/…)
+        public String stato;                // stato ordine (CREATO/PAGATO/ANNULLATO…)
         public BigDecimal totaleSpesa;
         public BigDecimal totaleIva;
-        public String metodoPagamento;
+        public String metodoPagamento;      // es. "Carta VISA (**** 1234)" / "PayPal" / "Pagamento alla consegna"
         public String clienteNome;
         public String spedizioneStato;      // IN_ELABORAZIONE / IN_TRANSITO / CONSEGNATO
     }
@@ -46,15 +46,9 @@ public class AdminOrdiniController extends HttpServlet {
                 String order = nn(req.getParameter("order"));
                 if (order == null) order = "dateDesc";
 
-                // Spedizione: _ALL => nessun filtro
-                String statoParam = req.getParameter("stato");
-                String stato = nn(statoParam);
-                if (statoParam != null && ("_ALL".equalsIgnoreCase(statoParam) || statoParam.isBlank())) stato = null;
-
-                // Pagamento: _ALL => nessun filtro
-                String payParam = req.getParameter("pay");
-                String pay = nn(payParam);
-                if (payParam != null && ("_ALL".equalsIgnoreCase(payParam) || payParam.isBlank())) pay = null;
+                // value="" (vuoto) dal form => nn("") = null => nessun filtro
+                String stato = nn(req.getParameter("stato")); // spedizione_stato
+                String pay   = nn(req.getParameter("pay"));   // tipo pagamento
 
                 StringBuilder sql = new StringBuilder(
                         "SELECT o.id, o.data_ordine, o.stato, o.totale_spesa, o.totale_iva, " +
@@ -68,11 +62,10 @@ public class AdminOrdiniController extends HttpServlet {
                 List<Object> params = new ArrayList<>();
 
                 if (stato != null) {
-                    where.append(" AND o.spedizione_stato=? ");
+                    where.append(" AND o.spedizione_stato = ? ");
                     params.add(stato);
                 }
                 if (pay != null) {
-                    // Filtra in base al prefisso salvato in metodo_pagamento
                     switch (pay.toUpperCase()) {
                         case "CARTA":
                             where.append(" AND o.metodo_pagamento LIKE ? ");
@@ -87,7 +80,7 @@ public class AdminOrdiniController extends HttpServlet {
                             params.add("Pagamento alla consegna%");
                             break;
                         default:
-                            // ignora filtri sconosciuti
+                            // ignora valori imprevisti
                     }
                 }
 
@@ -95,8 +88,8 @@ public class AdminOrdiniController extends HttpServlet {
                 sql.append(" ORDER BY ");
                 switch (order) {
                     case "dateAsc":   sql.append("o.data_ordine ASC"); break;
-                    case "priceDesc": sql.append("(o.totale_spesa+o.totale_iva) DESC"); break;
-                    case "priceAsc":  sql.append("(o.totale_spesa+o.totale_iva) ASC");  break;
+                    case "priceDesc": sql.append("(o.totale_spesa + o.totale_iva) DESC"); break;
+                    case "priceAsc":  sql.append("(o.totale_spesa + o.totale_iva) ASC");  break;
                     default:          sql.append("o.data_ordine DESC"); // dateDesc
                 }
 
@@ -119,10 +112,12 @@ public class AdminOrdiniController extends HttpServlet {
                     }
                 }
 
+                // Rimando alla JSP sia la lista sia i filtri "raw" (se null → value="" selezionato)
                 req.setAttribute("ordini", list);
                 req.setAttribute("order", order);
-                req.setAttribute("stato", stato);      // per tenere selezione
-                req.setAttribute("pay", pay);          // per tenere selezione
+                req.setAttribute("stato", stato); // può essere null
+                req.setAttribute("pay",   pay);   // può essere null
+
                 req.getRequestDispatcher("/gestioneordini.jsp").forward(req, resp);
                 return;
             }
