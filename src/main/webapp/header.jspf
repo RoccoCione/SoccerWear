@@ -35,8 +35,8 @@
 <!-- HEADER -->
     <header class="topbar">
       <div class="brand">
-  		<a href="home.jsp" class="brand-link">
-    	<img src="img/ball.png" alt="Logo SoccerWear" class="logo" />
+  		<a href="<%= request.getContextPath() %>/home.jsp" class="brand-link">
+    	<img src="<%= request.getContextPath() %>/img/ball.png" alt="Logo SoccerWear" class="logo" />
     	<div class="brand-text">
       	<h1 class="title">SOCCERWEAR</h1>
       	<p class="subtitle">Vesti anche tu sport!</p>
@@ -69,7 +69,7 @@
   		<% } %>
         <a href="#" class="navlink"><i class="fa-solid fa-circle-info"></i>Info</a>
          <% if (u != null) { %>
-    	<a href="profile.jsp" class="navlink"><i class="fa-solid fa-user"></i>Profilo</a>
+    	<a href="<%= request.getContextPath() %>/profile.jsp" class="navlink"><i class="fa-solid fa-user"></i>Profilo</a>
   		<% } else { %>
     	<a href="errore.jsp" class="navlink"><i class="fa-solid fa-user"></i>Profilo</a>
   		<% } %>

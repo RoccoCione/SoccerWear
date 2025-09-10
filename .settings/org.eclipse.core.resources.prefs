@@ -4,6 +4,7 @@ encoding//src/main/java/DAO/ProdottoDAO.java=UTF-8
 encoding//src/main/java/DAO/SpedizioneDAO.java=UTF-8
 encoding//src/main/java/DAO/UtenteDAO.java=UTF-8
 encoding//src/main/java/control/AddProdottoController.java=UTF-8
+encoding//src/main/java/control/AdminOrdiniController.java=UTF-8
 encoding//src/main/java/control/CartController.java=UTF-8
 encoding//src/main/java/control/ChangePasswordController.java=UTF-8
 encoding//src/main/java/control/CheckoutController.java=UTF-8

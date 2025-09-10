@@ -40,4 +40,12 @@ public class OrdineBean {
         BigDecimal iva = totaleIva != null ? totaleIva : BigDecimal.ZERO;
         return netto.add(iva);
     }
+	public void setMetodoPagamento(String string) {
+		// TODO Auto-generated method stub
+		
+	}
+	public String getMetodoPagamento() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }
