@@ -77,7 +77,8 @@ public class RegisterController extends HttpServlet {
 
         // 7) Esito
         if (registrato) {
-            response.sendRedirect(request.getContextPath() + "/login.jsp");
+        	request.getSession().setAttribute("flashOk", "Registrazione completata! Benvenuto/a.");
+        	response.sendRedirect(request.getContextPath() + "/login.jsp");
         } else {
             request.setAttribute("errore", "Registrazione fallita. Riprova.");
             request.getRequestDispatcher("register.jsp").forward(request, response);

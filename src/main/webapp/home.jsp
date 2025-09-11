@@ -86,6 +86,7 @@
 	  font-size:clamp(26px,4.2vw,42px);
 	  font-weight:900;
 	  letter-spacing:.02em;
+	  color:#FFF;
 	}
 	.slide-text{
 	  margin:0 auto 16px;
@@ -169,6 +170,24 @@
   </style>
 </head>
 <body>
+
+<%@ include file="toast.jspf" %>
+<%
+  String flashLoginOk = (String) session.getAttribute("flashLoginOk");
+  if (flashLoginOk != null) session.removeAttribute("flashLoginOk");
+%>
+<% if (flashLoginOk != null) { %>
+<script>
+  window.addEventListener('DOMContentLoaded', function(){
+    toast("<%= flashLoginOk.replace("\\","\\\\").replace("\"","\\\"").replace("\n"," ").replace("\r"," ") %>", {
+      variant: 'success',
+      title: 'Login effettuato',
+      timeout: 4200
+    });
+  });
+</script>
+<% } %>
+
   <div class="page">
     <%@ include file="header.jspf" %>
 

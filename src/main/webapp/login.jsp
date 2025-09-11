@@ -41,6 +41,24 @@
   </style>
 </head>
 <body>
+<%
+  String flashOk = (String) session.getAttribute("flashOk");
+  if (flashOk != null) session.removeAttribute("flashOk");
+%>
+<%@ include file="toast.jspf" %>
+<% if (flashOk != null) { %>
+<script>
+  window.addEventListener('DOMContentLoaded', function(){
+    toast(<%= "\"" + flashOk.replace("\\","\\\\").replace("\"","\\\"") + "\"" %>, {
+      variant: 'success',
+      title: 'Registrazione completata',
+      timeout: 4200
+    });
+  });
+</script>
+<% } %>
+
+
   <main class="scene">
     <div class="backdrop" aria-hidden="true">
       <img src="img/ball.png" alt="Pallone" class="ball" />

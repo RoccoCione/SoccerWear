@@ -34,7 +34,11 @@
     } else if ("priceDesc".equals(order)) {
         prodotti.sort(Comparator.comparingDouble(ProdottoBean::getCosto).reversed());
     }
+    
+    String searchNotice = (String) request.getAttribute("searchNotice");
 %>
+
+
 <!doctype html>
 <html lang="it">
 <head>
@@ -78,6 +82,39 @@
   <div class="page">
   
     <%@ include file="header.jspf" %>
+    
+    <% if (searchNotice != null) { %>
+  <div class="alert-box">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span><%= searchNotice %></span>
+  </div>
+<% } %>
+
+<style>
+  .alert-box {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 18px;
+    margin: 14px 0 20px;
+    border-radius: 14px;
+    font-weight: 600;
+    color: #f6f6f6;
+    background: linear-gradient(180deg,#1a1a1f,#121217);
+    border: 1px solid #3a3a4a;
+    box-shadow: 0 4px 14px rgba(0,0,0,.4);
+  }
+  .alert-box i {
+    color: #ffd700;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+  .alert-box span {
+    flex: 1;
+    font-size: 15px;
+    line-height: 1.4;
+  }
+</style>
     
     <h1 style="text-align:center;margin-bottom:20px;color:#FFFFFF"><i class="fa-solid fa-compass"></i> Catalogo prodotti</h1>
 

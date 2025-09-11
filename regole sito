@@ -4,7 +4,7 @@ Il sito deve essere di commercio elettronico:
 
 ** il cliente deve poter inserire prodotti nel carrello, variarne la quantità.
 
-Una volta confermato l'ordine deve essere possibile visualizzare l'ordine nell'elenco degli ordini effettuati e va svuotato il carrello. 
+** Una volta confermato l'ordine deve essere possibile visualizzare l'ordine nell'elenco degli ordini effettuati e va svuotato il carrello. 
 
 ** il prodotto viene visualizzato nel catalogo. si può selezionare per avere una descrizione dettagliata.
 
@@ -12,11 +12,11 @@ Una volta confermato l'ordine deve essere possibile visualizzare l'ordine nell'e
 
 Usare autenticazione programmata.
 
-L'AMMINISTRATORE DEVE POTER INSERIRE, MODIFICARE, VISUALIZZARE E CANCELLARE ELEMENTI DEL CATALOGO, VISUALIZZARE GLI ORDINI COMPLESSIVI, DALLA DATA ALLA DATA E PER CLIENTE.
+** L'AMMINISTRATORE DEVE POTER INSERIRE, MODIFICARE, VISUALIZZARE E CANCELLARE ELEMENTI DEL CATALOGO, VISUALIZZARE GLI ORDINI COMPLESSIVI, DALLA DATA ALLA DATA E PER CLIENTE.
 
 REQUISITO MOLTO IMPORTANTE: IL DATABASE DEVE ESSERE STRUTTURATO IN MODO TALE CHE SE VENGONO MODIFICATI IL PREZZO O L'IVA DI UN PRODOTTO ACQUISTATO SUCCESSIVAMENTE ALL'ACQUISTO L'ORDINE DEL CLIENTE MANTIENE I DATI CORRETTI.
 
-Va mantenuto il vincolo d'integrità referenziale: se l'amministratore cancella un prodotto non deve scomparire dagli ordini effettuati.
+** Va mantenuto il vincolo d'integrità referenziale: se l'amministratore cancella un prodotto non deve scomparire dagli ordini effettuati.
 
 ** Prevenire SQL injection
 
@@ -44,11 +44,11 @@ usare i filtri +++ NEW +++
 
        Almeno: utilizzare ajax per la barra di ricerca (come in google suggest)
 
-·     Gestire le sessioni per memorizzare il carrello. Si salva l'ordine nel DB dopo l'acquisto.
+·     ** Gestire le sessioni per memorizzare il carrello. Si salva l'ordine nel DB dopo l'acquisto.
 
-DARE conferma all'utente - registrazione effettuata con successo
+** DARE conferma all'utente - registrazione effettuata con successo
 
-**quando amministratore cancella chiedere conferma prima di eseguire
+** quando amministratore cancella chiedere conferma prima di eseguire
 
 Gestire pagine di errore. il server non deve perdere il controllo in caso di errore
 

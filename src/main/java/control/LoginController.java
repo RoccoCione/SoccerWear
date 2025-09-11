@@ -62,6 +62,7 @@ public class LoginController extends HttpServlet {
             }
 
             // 3c. Redirect alla home page protetta
+            session.setAttribute("flashLoginOk", "Ciao " + utente.getNome() + ", accesso effettuato con successo!");
             response.sendRedirect("home.jsp");
             
          // dopo login successo

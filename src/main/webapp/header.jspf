@@ -168,10 +168,10 @@
       <div class="again">Bello rivederti!</div>
     </div>
 
-    <form class="search" role="search" action="#" method="get">
-      <span class="icon" aria-hidden="true"><i class="fa-solid fa-magnifying-glass"></i></span>
-      <input name="q" type="search" placeholder="Cerca" aria-label="Cerca prodotti" />
-    </form>
+    <form class="search" role="search" action="<%= request.getContextPath() %>/search" method="get">
+  	<span class="icon" aria-hidden="true"><i class="fa-solid fa-magnifying-glass"></i></span>
+  	<input name="q" type="search" placeholder="Cerca prodotti (min 2 caratteri)" aria-label="Cerca prodotti" />
+	</form>
   </div>
 
   <!-- Backdrop per il menu mobile -->

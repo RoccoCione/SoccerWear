@@ -294,4 +294,39 @@ public class ProdottoDAO {
     }
 
 
+    public List<ProdottoBean> searchByNameOrCategory(String q, int limit) throws Exception {
+        List<ProdottoBean> list = new java.util.ArrayList<>();
+        String like = "%" + q + "%";
+
+        String sql =
+            "SELECT id, nome, descrizione, categoria, taglia, numero_maglia, unita_disponibili, costo, iva " +
+            "FROM prodotto " +
+            "WHERE nome LIKE ? OR categoria LIKE ? " +
+            "ORDER BY nome ASC " +
+            "LIMIT ?";
+
+        try (java.sql.Connection con = model.ConnectionDatabase.getConnection();
+             java.sql.PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, like);
+            ps.setString(2, like);
+            ps.setInt(3, Math.max(1, limit));
+            try (java.sql.ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    model.ProdottoBean p = new model.ProdottoBean();
+                    p.setId(rs.getInt("id"));
+                    p.setNome(rs.getString("nome"));
+                    p.setDescrizione(rs.getString("descrizione"));
+                    p.setCategoria(rs.getString("categoria"));
+                    p.setTaglia(rs.getString("taglia"));
+                    p.setNumeroMaglia((Integer) rs.getObject("numero_maglia"));
+                    p.setUnitaDisponibili((Integer) rs.getObject("unita_disponibili"));
+                    p.setCosto(rs.getDouble("costo"));
+                    p.setIva(rs.getDouble("iva"));
+                    list.add(p);
+                }
+            }
+        }
+        return list;
+    }
+
 }
