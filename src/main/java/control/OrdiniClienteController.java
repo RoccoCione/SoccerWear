@@ -32,11 +32,25 @@ public class OrdiniClienteController extends HttpServlet {
         }
 
         List<OrdineBean> ordini = new ArrayList<>();
+
+        // LEFT JOIN con l’ultimo reso per ordine (identificato dal MAX(id) su quella tabella)
+        String sql =
+            "SELECT o.id, o.utente_id, o.spedizione_id, o.data_ordine, o.totale_spesa, o.totale_iva, o.stato, " +
+            "       COALESCE(o.metodo_pagamento,'') AS metodo_pagamento, o.spedizione_stato, " +
+            "       r.stato AS reso_stato " +
+            "FROM ordine o " +
+            "LEFT JOIN ( " +
+            "   SELECT r1.ordine_id, r1.stato " +
+            "   FROM reso r1 " +
+            "   JOIN (SELECT ordine_id, MAX(id) AS max_id FROM reso GROUP BY ordine_id) t " +
+            "     ON t.ordine_id = r1.ordine_id AND t.max_id = r1.id " +
+            ") r ON r.ordine_id = o.id " +
+            "WHERE o.utente_id=? " +
+            "ORDER BY " + orderBy;
+
         try (Connection con = model.ConnectionDatabase.getConnection();
-             PreparedStatement ps = con.prepareStatement(
-               "SELECT o.id, o.utente_id, o.spedizione_id, o.data_ordine, o.totale_spesa, o.totale_iva, o.stato, " +
-               "       COALESCE(o.metodo_pagamento,'') AS metodo_pagamento, o.spedizione_stato " +
-               "FROM ordine o WHERE o.utente_id=? ORDER BY " + orderBy)) {
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
             ps.setInt(1, u.getId());
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -48,16 +62,41 @@ public class OrdiniClienteController extends HttpServlet {
                     ob.setTotaleSpesa(rs.getBigDecimal("totale_spesa"));
                     ob.setTotaleIva(rs.getBigDecimal("totale_iva"));
                     ob.setStato(rs.getString("stato"));
-                    // se OrdineBean non ha il campo spedizioneStato, passalo come attribute separato
+
+                    // opzionale: se OrdineBean ha il setter per metodoPagamento
+                    try { ob.getClass().getMethod("setMetodoPagamento", String.class)
+                            .invoke(ob, rs.getString("metodo_pagamento")); } catch(Exception ignore){}
+
+                    // spedizione_stato passato come attribute separato (se non presente nel bean)
                     req.setAttribute("spedizione_stato_" + ob.getId(), rs.getString("spedizione_stato"));
-                    // opzionale: se hai get/setMetodoPagamento sul bean
-                    try { ob.getClass().getMethod("setMetodoPagamento", String.class).invoke(ob, rs.getString("metodo_pagamento")); } catch(Exception ignore){}
+
+                    // >>> nuovo: stato del reso (se esiste) per questo ordine
+                    String resoStato = rs.getString("reso_stato"); // può essere null
+                    req.setAttribute("reso_stato_" + ob.getId(), resoStato);
+
                     ordini.add(ob);
                 }
             }
         } catch (Exception e) {
             throw new ServletException(e);
         }
+        
+        try (Connection con = model.ConnectionDatabase.getConnection()) {
+            try (PreparedStatement ps = con.prepareStatement("SELECT ordine_id, id FROM fattura WHERE ordine_id IN (" +
+                    ordini.stream().map(o->"?").reduce((a,b)->a+","+b).orElse("0") + ")")) {
+                int i=1;
+                for (model.OrdineBean o: ordini) ps.setInt(i++, o.getId());
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        int ordineId = rs.getInt("ordine_id");
+                        int fattId   = rs.getInt("id");
+                        req.setAttribute("fattura_id_" + ordineId, fattId);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+        	throw new ServletException(e);
+		}
 
         req.setAttribute("ordini", ordini);
         req.setAttribute("order", order);

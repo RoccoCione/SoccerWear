@@ -26,12 +26,10 @@
 
     /* Tabella */
     .table-wrap{width:100%;overflow:auto;border-radius:12px;border:1px solid #222}
-    table{width:100%;border-collapse:collapse;min-width:1000px} /* min-width per permettere lo scroll su mobile */
+    table{width:100%;border-collapse:collapse;min-width:1000px}
     th,td{padding:10px;border-bottom:1px solid rgba(255,255,255,.1);text-align:left;vertical-align:top;color:#FFF}
     th{color:var(--accent);white-space:nowrap}
-    td.descrizione{
-      max-width: 360px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-    }
+    td.descrizione{max-width:360px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .cell-actions{display:flex;gap:8px;flex-wrap:wrap}
 
     /* Bottoni / Campi */
@@ -62,8 +60,6 @@
     }
 
     /* ===== Responsive ===== */
-
-    /* Tablet: form 2 colonne, tabella più compatta */
     @media (max-width:1024px){
       .form-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
       td.descrizione{max-width:280px}
@@ -71,8 +67,6 @@
       table thead th:nth-child(9),
       table tbody td:nth-child(9){display:none}
     }
-
-    /* Phablet: form 1 colonna, nascondo Categoria */
     @media (max-width:768px){
       .page{padding:20px 16px 28px}
       .form-grid{grid-template-columns:1fr}
@@ -82,11 +76,9 @@
       table thead th:nth-child(4),
       table tbody td:nth-child(4){display:none}
     }
-
-    /* Mobile stretto: nascondo Numero Maglia; bottoni a blocchi */
     @media (max-width:560px){
       table{min-width:760px}
-      /* nascondi Numero Maglia */
+      /* nascondi Tipo su mobile stretto */
       table thead th:nth-child(6),
       table tbody td:nth-child(6){display:none}
       .cell-actions{gap:6px}
@@ -118,7 +110,7 @@
           <thead>
             <tr>
               <th>ID</th><th>Nome</th><th>Descrizione</th><th>Categoria</th>
-              <th>Taglia</th><th>Numero Maglia</th><th>Disponibili</th>
+              <th>Taglia</th><th>Tipo</th><th>Disponibili</th>
               <th>Prezzo</th><th>IVA</th><th>Azioni</th>
             </tr>
           </thead>
@@ -135,7 +127,7 @@
               </td>
               <td><%= p.getCategoria() %></td>
               <td><%= p.getTaglia() %></td>
-              <td><%= p.getNumeroMaglia() != null ? p.getNumeroMaglia() : "-" %></td>
+              <td><%= (p.getTipo() != null && !p.getTipo().isBlank()) ? p.getTipo() : "-" %></td>
               <td><%= p.getUnitaDisponibili() != null ? p.getUnitaDisponibili() : "-" %></td>
               <td><%= String.format(java.util.Locale.US, "%.2f", p.getCosto()) %> €</td>
               <td><%= String.format(java.util.Locale.US, "%.2f", p.getIva()) %>%</td>
@@ -147,7 +139,7 @@
                   data-desc="<%= p.getDescrizione() != null ? java.net.URLEncoder.encode(p.getDescrizione(), "UTF-8") : "" %>"
                   data-cat="<%= p.getCategoria() %>"
                   data-taglia="<%= p.getTaglia() %>"
-                  data-numero="<%= p.getNumeroMaglia() != null ? p.getNumeroMaglia() : "" %>"
+                  data-tipo="<%= (p.getTipo()!=null?p.getTipo():"") %>"
                   data-unita="<%= p.getUnitaDisponibili() != null ? p.getUnitaDisponibili() : "" %>"
                   data-costo="<%= String.format(java.util.Locale.US, "%.2f", p.getCosto()) %>"
                   data-iva="<%= String.format(java.util.Locale.US, "%.2f", p.getIva()) %>">
@@ -172,11 +164,26 @@
       <h2><i class="fa-solid fa-plus"></i> Aggiungi nuovo prodotto</h2>
       <form action="<%= ctx %>/admin/add-prodotto" method="post" enctype="multipart/form-data">
         <div class="form-grid">
-          <div><label>Nome</label><input type="text" name="nome" required></div>
-          <div><label>Descrizione</label><textarea name="descrizione"></textarea></div>
-          <div><label>Numero Maglia</label><input type="number" name="numero_maglia"></div>
+          <div>
+            <label>Nome</label>
+            <input type="text" name="nome" required>
+          </div>
 
-          <div><label>Categoria</label>
+          <div>
+            <label>Descrizione</label>
+            <textarea name="descrizione"></textarea>
+          </div>
+
+          <div>
+            <label>Tipo</label>
+            <select name="tipo" required>
+              <option value="Replica">Replica</option>
+              <option value="Authentic">Authentic</option>
+            </select>
+          </div>
+
+          <div>
+            <label>Categoria</label>
             <select name="categoria" required>
               <option value="SerieA">Serie A</option>
               <option value="PremierLeague">Premier League</option>
@@ -185,17 +192,35 @@
             </select>
           </div>
 
-          <div><label>Taglia</label>
+          <div>
+            <label>Taglia</label>
             <select name="taglia" required>
-              <option value="S">S</option><option value="M">M</option>
-              <option value="L">L</option><option value="XL">XL</option>
+              <option value="S">S</option>
+              <option value="M">M</option>
+              <option value="L">L</option>
+              <option value="XL">XL</option>
             </select>
           </div>
 
-          <div><label>Disponibili</label><input type="number" name="unita_disponibili" min="0"></div>
-          <div><label>Prezzo €</label><input type="number" step="0.01" name="costo" required></div>
-          <div><label>IVA %</label><input type="number" step="0.01" name="iva" required></div>
-          <div><label>Foto</label><input type="file" name="foto" accept="image/*"></div>
+          <div>
+            <label>Disponibili</label>
+            <input type="number" name="unita_disponibili" min="0">
+          </div>
+
+          <div>
+            <label>Prezzo €</label>
+            <input type="number" step="0.01" name="costo" required>
+          </div>
+
+          <div>
+            <label>IVA %</label>
+            <input type="number" step="0.01" name="iva" required>
+          </div>
+
+          <div>
+            <label>Foto</label>
+            <input type="file" name="foto" accept="image/*">
+          </div>
         </div>
 
         <div style="margin-top:14px;text-align:right">
@@ -235,8 +260,11 @@
             <option value="XL">XL</option>
           </select>
 
-          <label>Numero Maglia</label>
-          <input type="number" name="numero_maglia" id="editNumeroMaglia">
+          <label>Tipo</label>
+          <select name="tipo" id="editTipo" required>
+            <option value="Replica">Replica</option>
+            <option value="Authentic">Authentic</option>
+          </select>
 
           <label>Disponibili</label>
           <input type="number" name="unita_disponibili" id="editUnita">
@@ -265,7 +293,6 @@
         m.setAttribute('aria-hidden','true');
       }
 
-      // Decodifica compatibile con URLEncoder (converte + in spazio prima di decodeURIComponent)
       function decodeFromURLEncoder(s) {
         return decodeURIComponent((s || '').replace(/\+/g, '%20'));
       }
@@ -285,7 +312,7 @@
         document.getElementById('editDescrizione').value   = desc;
         document.getElementById('editCategoria').value     = d.cat || 'SerieA';
         document.getElementById('editTaglia').value        = d.taglia || 'M';
-        document.getElementById('editNumeroMaglia').value  = d.numero || '';
+        document.getElementById('editTipo').value          = d.tipo && (d.tipo === 'Authentic' ? 'Authentic' : 'Replica');
         document.getElementById('editUnita').value         = d.unita || '';
         document.getElementById('editCosto').value         = d.costo || '';
         document.getElementById('editIva').value           = d.iva || '';

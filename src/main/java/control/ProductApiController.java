@@ -29,7 +29,7 @@ public class ProductApiController extends HttpServlet {
         String idStr = trimOrNull(req.getParameter("id"));
 
         try {
-            // 1) Se c'è "nome", usiamo il gruppo varianti per nome
+            // 1) Gruppo varianti per nome
             if (nome != null) {
                 ProdottoBean representative = prodottoDAO.findFirstVariantByNome(nome);
                 if (representative == null) {
@@ -46,6 +46,7 @@ public class ProductApiController extends HttpServlet {
                         representative.getNome(),
                         representative.getDescrizione(),
                         representative.getCategoria(),
+                        nullToEmpty(representative.getTipo()), // <-- TIPO
                         representative.getCosto(),
                         representative.getIva(),
                         taglieStock,
@@ -55,7 +56,7 @@ public class ProductApiController extends HttpServlet {
                 return;
             }
 
-            // 2) Fallback: se non c'è nome ma c'è id, carica la singola variante
+            // 2) Singola variante per id
             if (idStr != null) {
                 int id = Integer.parseInt(idStr);
                 ProdottoBean p = prodottoDAO.findById(id);
@@ -63,7 +64,6 @@ public class ProductApiController extends HttpServlet {
                     writeJson(resp, 404, jsonError("Prodotto non trovato per id: " + id));
                     return;
                 }
-                // Mappa taglie solo per lo stesso nome
                 Map<String, Integer> taglieStock = prodottoDAO.findTaglieDisponibiliByNome(p.getNome());
                 String imageUrl = req.getContextPath() + "/image?id=" + p.getId();
 
@@ -71,6 +71,7 @@ public class ProductApiController extends HttpServlet {
                         p.getNome(),
                         p.getDescrizione(),
                         p.getCategoria(),
+                        nullToEmpty(p.getTipo()), // <-- TIPO
                         p.getCosto(),
                         p.getIva(),
                         taglieStock,
@@ -109,13 +110,14 @@ public class ProductApiController extends HttpServlet {
     }
 
     /**
-     * JSON “flat”:
+     * JSON:
      * {
      *   "success": true,
      *   "data": {
      *     "nome": "...",
      *     "descrizione": "...",
      *     "categoria": "...",
+     *     "tipo": "REPLICA|AUTHENTIC",   <-- aggiunto
      *     "prezzo": 79.90,
      *     "iva": 22.00,
      *     "taglie": { "S": 5, "M": 0, "L": 3, "XL": 2 },
@@ -126,6 +128,7 @@ public class ProductApiController extends HttpServlet {
     private static String buildProductJson(String nome,
                                            String descrizione,
                                            String categoria,
+                                           String tipo,                 // <-- nuovo parametro
                                            double prezzo,
                                            double iva,
                                            Map<String, Integer> taglie,
@@ -136,6 +139,9 @@ public class ProductApiController extends HttpServlet {
         sb.append("\"nome\":\"").append(jsonEscape(nullToEmpty(nome))).append("\",");
         sb.append("\"descrizione\":\"").append(jsonEscape(nullToEmpty(descrizione))).append("\",");
         sb.append("\"categoria\":\"").append(jsonEscape(nullToEmpty(categoria))).append("\",");
+
+        // nuovo campo TIPO (stringa, può essere vuota)
+        sb.append("\"tipo\":\"").append(jsonEscape(nullToEmpty(tipo))).append("\",");
 
         // numeri come numeri
         sb.append("\"prezzo\":").append(String.format(java.util.Locale.US, "%.2f", prezzo)).append(",");

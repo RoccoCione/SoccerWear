@@ -16,8 +16,7 @@ public class ProdottoDAO {
         p.setId(rs.getInt("id"));
         p.setNome(rs.getString("nome"));
         p.setDescrizione(rs.getString("descrizione"));
-        int numero = rs.getInt("numero_maglia");
-        p.setNumeroMaglia(rs.wasNull() ? null : numero);
+        p.setTipo(rs.getString("tipo"));
         p.setCosto(rs.getDouble("costo"));
         p.setIva(rs.getDouble("iva"));
         p.setTaglia(rs.getString("taglia"));
@@ -67,44 +66,50 @@ public class ProdottoDAO {
         return null;
     }
 
-    public boolean insert(ProdottoBean p) {
-        String sql = """
-            INSERT INTO prodotto (nome, descrizione, numero_maglia, costo, iva, taglia, categoria, unita_disponibili, foto, attivo)
-            VALUES (?,?,?,?,?,?,?,?,?,?)
-        """;
+    public boolean insert(ProdottoBean p) throws Exception {
+        String sql = "INSERT INTO prodotto " +
+                     "(nome, descrizione, categoria, taglia, tipo, costo, iva, unita_disponibili, foto, attivo) " +
+                     "VALUES (?,?,?,?,?,?,?,?,?,?)";
 
-        try (Connection con = ConnectionDatabase.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+        try (Connection con = model.ConnectionDatabase.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql, java.sql.Statement.RETURN_GENERATED_KEYS)) {
 
+            
             ps.setString(1, p.getNome());
             ps.setString(2, p.getDescrizione());
-            if (p.getNumeroMaglia() != null) ps.setInt(3, p.getNumeroMaglia()); else ps.setNull(3, Types.INTEGER);
-            ps.setDouble(4, p.getCosto());
-            ps.setDouble(5, p.getIva());
-            ps.setString(6, p.getTaglia());
-            ps.setString(7, p.getCategoria());
-            ps.setInt(8, p.getUnitaDisponibili() != null ? p.getUnitaDisponibili() : 0);
+            ps.setString(3, p.getCategoria());
+            ps.setString(4, p.getTaglia());
+            ps.setString(5, p.getTipo());
+            ps.setDouble(6, p.getCosto());
+            ps.setDouble(7, p.getIva());
+            ps.setInt(8, p.getUnitaDisponibili());
             ps.setBytes(9, p.getFoto());
             ps.setBoolean(10, p.isAttivo());
 
-            int rows = ps.executeUpdate();
-            if (rows > 0) {
-                try (ResultSet keys = ps.getGeneratedKeys()) {
-                    if (keys.next()) p.setId(keys.getInt(1));
+            int upd = ps.executeUpdate();
+            if (upd > 0) {
+                try (ResultSet rs = ps.getGeneratedKeys()) {
+                    if (rs.next()) p.setId(rs.getInt(1));
                 }
                 return true;
             }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
+            return false;
         }
-        return false;
     }
+
+    
+    private String normalizeTipo(String t){
+        if (t == null) return "Replica";
+        t = t.trim();
+        if (t.equalsIgnoreCase("Authentic")) return "Authentic";
+        return "Replica";
+    }
+
 
     public boolean update(ProdottoBean p) {
         String sql = """
             UPDATE prodotto
-            SET nome=?, descrizione=?, numero_maglia=?, costo=?, iva=?, taglia=?, categoria=?, unita_disponibili=?, foto=?, attivo=?
+            SET nome=?, descrizione=?, costo=?, iva=?, taglia=?, categoria=?, unita_disponibili=?, foto=?, attivo=?, tipo=?
             WHERE id=?
         """;
 
@@ -113,7 +118,6 @@ public class ProdottoDAO {
 
             ps.setString(1, p.getNome());
             ps.setString(2, p.getDescrizione());
-            if (p.getNumeroMaglia() != null) ps.setInt(3, p.getNumeroMaglia()); else ps.setNull(3, Types.INTEGER);
             ps.setDouble(4, p.getCosto());
             ps.setDouble(5, p.getIva());
             ps.setString(6, p.getTaglia());
@@ -121,6 +125,7 @@ public class ProdottoDAO {
             ps.setInt(8, p.getUnitaDisponibili() != null ? p.getUnitaDisponibili() : 0);
             ps.setBytes(9, p.getFoto());
             ps.setBoolean(10, p.isAttivo());
+            ps.setString(8, normalizeTipo(p.getTipo()));
             ps.setInt(11, p.getId());
 
             return ps.executeUpdate() > 0;
@@ -299,7 +304,7 @@ public class ProdottoDAO {
         String like = "%" + q + "%";
 
         String sql =
-            "SELECT id, nome, descrizione, categoria, taglia, numero_maglia, unita_disponibili, costo, iva " +
+            "SELECT id, nome, descrizione, categoria, taglia, unita_disponibili, costo, iva, tipo" +
             "FROM prodotto " +
             "WHERE nome LIKE ? OR categoria LIKE ? " +
             "ORDER BY nome ASC " +
@@ -318,10 +323,10 @@ public class ProdottoDAO {
                     p.setDescrizione(rs.getString("descrizione"));
                     p.setCategoria(rs.getString("categoria"));
                     p.setTaglia(rs.getString("taglia"));
-                    p.setNumeroMaglia((Integer) rs.getObject("numero_maglia"));
                     p.setUnitaDisponibili((Integer) rs.getObject("unita_disponibili"));
                     p.setCosto(rs.getDouble("costo"));
                     p.setIva(rs.getDouble("iva"));
+                    p.setTipo(rs.getString("tipo"));
                     list.add(p);
                 }
             }

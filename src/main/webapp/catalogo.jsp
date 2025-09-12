@@ -1,7 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="java.util.*, model.ProdottoBean, model.UtenteBean, DAO.ProdottoDAO" %>
 <%
-    
     // Parametri filtro/ordinamento
     String order     = request.getParameter("order");       // priceAsc | priceDesc | null
     String categoria = request.getParameter("categoria");   // SerieA | PremierLeague | LaLiga | Vintage | null
@@ -188,10 +187,9 @@
           <a href="javascript:void(0)" class="btn" onclick="openDetailsById(<%= p.getId() %>)">
             <i class="fa-solid fa-eye"></i> Dettagli
           </a>
-          <form action="<%=ctx%>/cart/add" method="post" style="margin-top:6px;">
-            <input type="hidden" name="id" value="<%=p.getId()%>">
-            <button type="submit" class="btn"><i class="fa-solid fa-cart-plus"></i> Aggiungi al carrello</button>
-          </form>
+          <a href="javascript:void(0)" class="btn" onclick="openDetailsById(<%= p.getId() %>)">
+            <i class="fa-solid fa-cart-plus"></i></i> Aggiungi al carrello
+          </a>
         </div>
       </div>
     </div>
@@ -212,6 +210,8 @@
           <div style="flex:1;min-width:260px;">
             <h2 id="modalTitle" style="margin:0 0 6px;font-weight:900;font-size:26px;"></h2>
             <div style="color:#555;margin-bottom:8px;">Categoria: <span id="modalCat"></span></div>
+            <!-- 👇 NUOVO: Tipo -->
+            <div style="color:#555;margin-bottom:8px;">Tipo: <span id="modalTipo"></span></div>
             <p id="modalDesc" style="margin:10px 0 14px;color:#333;"></p>
             <div id="modalPrice" style="color:#0d47a1;font-weight:900;font-size:20px;margin:6px 0 12px;"></div>
 
@@ -369,6 +369,8 @@
       document.getElementById('modalTitle').textContent = d.nome || '';
       document.getElementById('modalDesc').textContent  = d.descrizione || '';
       document.getElementById('modalCat').textContent   = d.categoria || '';
+      // 👇 NUOVO: Tipo dal JSON
+      document.getElementById('modalTipo').textContent  = d.tipo || '-';
       document.getElementById('modalPrice').textContent = Number(d.prezzo).toFixed(2) + ' € + IVA';
 
       const img = document.getElementById('modalImg');

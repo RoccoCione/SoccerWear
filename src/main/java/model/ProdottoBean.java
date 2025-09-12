@@ -5,7 +5,7 @@ public class ProdottoBean {
     private int id;                     // PK
     private String nome;                // nome prodotto
     private String descrizione;         // descrizione o squadra
-    private Integer numeroMaglia;       // es. 10
+    private String tipo;       
     private double costo;               // prezzo listino attuale
     private double iva;                 // percentuale IVA
     private String taglia;              // ENUM('S','M','L','XL')
@@ -37,12 +37,8 @@ public class ProdottoBean {
         this.descrizione = descrizione;
     }
 
-    public Integer getNumeroMaglia() {
-        return numeroMaglia;
-    }
-    public void setNumeroMaglia(Integer numeroMaglia) {
-        this.numeroMaglia = numeroMaglia;
-    }
+    public String getTipo() { return tipo; }
+    public void setTipo(String tipo) { this.tipo = tipo; }
 
     public double getCosto() {
         return costo;

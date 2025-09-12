@@ -130,12 +130,14 @@
         <i class="fa-solid fa-truck"></i> Gestione Ordini
       </a>
     <% } else { %>
-      <a href="<%= request.getContextPath() %>/novita.jsp" class="navlink">
-        <i class="fa-solid fa-award"></i> Ultimi Arrivi
+      <a href="<%= request.getContextPath() %>/guidaTaglie.jsp" class="navlink">
+        <i class="fa-solid fa-tags"></i> Guida alle taglie
       </a>
     <% } %>
 
-    <a href="#" class="navlink"><i class="fa-solid fa-circle-info"></i> Info</a>
+    <a href="<%= request.getContextPath() %>/info.jsp" class="navlink">
+  		<i class="fa-solid fa-circle-info"></i> Info
+	</a>
 
     <% if (u != null) { %>
       <a href="<%= request.getContextPath() %>/profile.jsp" class="navlink"><i class="fa-solid fa-user"></i> Profilo</a>

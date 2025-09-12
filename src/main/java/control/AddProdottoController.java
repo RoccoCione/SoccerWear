@@ -40,10 +40,10 @@ public class AddProdottoController extends HttpServlet {
         try {
             // --- Parametri dal form ---
             String nome        = getParam(request, "nome");
-            String descrizione = firstNonBlank(getParam(request, "descrizione"), getParam(request, "squadra")); // compat
-            Integer numeroMaglia = parseInteger(getParam(request, "numero_maglia")); // opzionale
+            String descrizione = firstNonBlank(getParam(request, "descrizione"), getParam(request, "squadra")); // compat vecchi form
             String taglia      = getParam(request, "taglia");
             String categoria   = getParam(request, "categoria");
+            String tipo        = normalizeTipo(getParam(request, "tipo")); // NEW: Replica | Authentic
 
             Double costo = parseDouble(getParam(request, "costo")); // gestisce "12,50"
             Double iva   = parseDouble(getParam(request, "iva"));
@@ -60,19 +60,11 @@ public class AddProdottoController extends HttpServlet {
                 response.sendRedirect(request.getContextPath() + "/admincatalogo.jsp");
                 return;
             }
-
-            // --- (Opzionale) Guard-rail anti-duplicato applicativo ---
-            // Se per te nome+taglia identifica una variante unica, puoi bloccare l'inserimento qui:
-            /*
-            List<ProdottoBean> esistenti = prodottoDAO.findByNome(nome);
-            boolean esisteStessaTaglia = esistenti.stream().anyMatch(pb ->
-                    taglia != null && taglia.equalsIgnoreCase(pb.getTaglia()));
-            if (esisteStessaTaglia) {
-                session.setAttribute("errore", "Esiste già una variante con stesso nome e taglia.");
+            if (tipo == null) {
+                session.setAttribute("errore", "Seleziona il tipo prodotto (Replica o Authentic).");
                 response.sendRedirect(request.getContextPath() + "/admincatalogo.jsp");
                 return;
             }
-            */
 
             // --- Foto (opzionale, BLOB) ---
             byte[] fotoBytes = null;
@@ -87,7 +79,6 @@ public class AddProdottoController extends HttpServlet {
             ProdottoBean p = new ProdottoBean();
             p.setNome(nome);
             p.setDescrizione(descrizione);
-            p.setNumeroMaglia(numeroMaglia);
             p.setTaglia(taglia);
             p.setCategoria(categoria);
             p.setCosto(costo);
@@ -95,6 +86,7 @@ public class AddProdottoController extends HttpServlet {
             p.setUnitaDisponibili(unita != null ? unita : 0);
             p.setFoto(fotoBytes);
             p.setAttivo(true); // nuovo prodotto attivo
+            p.setTipo(tipo);   // NEW
 
             // --- Insert ---
             boolean ok = prodottoDAO.insert(p);
@@ -133,5 +125,13 @@ public class AddProdottoController extends HttpServlet {
         if (a != null && !a.isBlank()) return a;
         if (b != null && !b.isBlank()) return b;
         return null;
+    }
+
+    // Accetta solo i due valori previsti, default = Replica
+    private String normalizeTipo(String t) {
+        if (t == null) return "Replica";
+        t = t.trim();
+        if ("Authentic".equalsIgnoreCase(t)) return "Authentic";
+        return "Replica";
     }
 }

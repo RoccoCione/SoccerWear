@@ -2,6 +2,7 @@ package control;
 
 import DAO.ProdottoDAO;
 import model.ProdottoBean;
+import model.UtenteBean;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
@@ -27,6 +28,14 @@ public class EditProdottoController extends HttpServlet {
         request.setCharacterEncoding("UTF-8");
         HttpSession session = request.getSession();
 
+        // ✅ Solo ADMIN
+        HttpSession sess = request.getSession(false);
+        UtenteBean u = (sess != null) ? (UtenteBean) sess.getAttribute("utente") : null;
+        if (u == null || !"ADMIN".equalsIgnoreCase(u.getRuolo())) {
+            response.sendRedirect(request.getContextPath() + "/home.jsp");
+            return;
+        }
+
         try {
             // 1) ID robusto
             String idStr = request.getParameter("id");
@@ -50,9 +59,10 @@ public class EditProdottoController extends HttpServlet {
             String descrizione = request.getParameter("descrizione");
             String categoria   = request.getParameter("categoria");
             String taglia      = request.getParameter("taglia");
+            String tipoRaw     = request.getParameter("tipo");              // NEW
+            String tipo        = normalizeTipo(tipoRaw);                    // NEW (Replica/Authentic o null se non passato)
 
             // interi/decimali con parsing safe (accetta anche virgola)
-            Integer numeroMaglia     = parseInteger(request.getParameter("numero_maglia"));
             Integer unitaDisponibili = parseInteger(request.getParameter("unita_disponibili"));
             Double  costo            = parseDouble(request.getParameter("costo"));
             Double  iva              = parseDouble(request.getParameter("iva"));
@@ -69,15 +79,15 @@ public class EditProdottoController extends HttpServlet {
             // 5) Aggiorna SOLO i campi: se un campo è nullo nella form, mantieni quello esistente
             ProdottoBean p = new ProdottoBean();
             p.setId(id);
-            p.setNome(nome != null ? nome : existing.getNome());
-            p.setDescrizione(descrizione != null ? descrizione : existing.getDescrizione());
-            p.setCategoria(categoria != null ? categoria : existing.getCategoria());
-            p.setTaglia(taglia != null ? taglia : existing.getTaglia());
-            p.setNumeroMaglia(numeroMaglia != null ? numeroMaglia : existing.getNumeroMaglia());
+            p.setNome(        nome        != null ? nome.trim()        : existing.getNome());
+            p.setDescrizione( descrizione != null ? descrizione.trim() : existing.getDescrizione());
+            p.setCategoria(   categoria   != null ? categoria.trim()   : existing.getCategoria());
+            p.setTaglia(      taglia      != null ? taglia.trim()      : existing.getTaglia());
+            p.setTipo(        tipo        != null ? tipo               : existing.getTipo());   // NEW
             p.setUnitaDisponibili(unitaDisponibili != null ? unitaDisponibili : existing.getUnitaDisponibili());
-            p.setCosto(costo != null ? costo : existing.getCosto());
-            p.setIva(iva != null ? iva : existing.getIva());
-            p.setFoto(fotoBytes != null ? fotoBytes : existing.getFoto());
+            p.setCosto(       costo       != null ? costo              : existing.getCosto());
+            p.setIva(         iva         != null ? iva                : existing.getIva());
+            p.setFoto(        fotoBytes   != null ? fotoBytes          : existing.getFoto());
             p.setAttivo(existing.isAttivo()); // non toccare lo stato
 
             // 6) UPDATE (mai insert qui)
@@ -106,5 +116,15 @@ public class EditProdottoController extends HttpServlet {
             if (v == null || v.isBlank()) return null;
             return Double.parseDouble(v.replace(',', '.').trim());
         } catch (Exception e) { return null; }
+    }
+
+    // Accetta solo i due valori previsti; se non presente in form -> null (così manteniamo il valore esistente)
+    private String normalizeTipo(String t) {
+        if (t == null) return null;
+        t = t.trim();
+        if ("Authentic".equalsIgnoreCase(t)) return "Authentic";
+        if ("Replica".equalsIgnoreCase(t))   return "Replica";
+        // se arriva un valore imprevisto, fallback a Replica (oppure null per non toccare):
+        return "Replica";
     }
 }
